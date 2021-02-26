@@ -1,2 +1,2 @@
-# news-react
-A news app make in react
+# News React
+A news app make in react.
