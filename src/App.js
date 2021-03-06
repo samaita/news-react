@@ -11,12 +11,14 @@ function App() {
 }
 
 function Home() {
-	const [selectedCategory, setSelectedCategory] = useState("all")
+	const [selectedCategory, setSelectedCategory] = useState(
+		{ name: "All", slug: "all", title: "Latest" }
+	)
 	const [articleList, setArticleList] = useState([
 		{}
 	])
 	const [categories, setCategories] = useState([
-		{ name: "All", slug: "all" },
+		{ name: "All", slug: "all", title: "Latest" },
 		{ name: "Space", slug: "space" },
 		{ name: "Energy", slug: "energy" },
 		{ name: "Health", slug: "health" },
@@ -40,7 +42,9 @@ function Home() {
 				categories={categories}
 				selectedCategory={selectedCategory}
 				handleSelectCategory={handleSelectCategory} />
-			<ArticleView />
+			<ArticleView
+				articleList={articleList}
+				selectedCategory={selectedCategory} />
 		</div>
 	)
 }
@@ -51,10 +55,10 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 			<ul className="flex flex-row overflow-x-scroll hide-scroll-bar">
 				{categories.map(function (category, index) {
 					let isFirst = index === 0;
-					let isSelected = category.slug === selectedCategory;
+					let isSelected = category.slug === selectedCategory.slug;
 					return (
 						<li className={`${isFirst ? "ml-5" : ""}`}>
-							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href="#" onClick={() => handleSelectCategory(category.slug)}>
+							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href="#" onClick={() => handleSelectCategory(category)}>
 								{category.name}
 							</a>
 						</li>
@@ -65,7 +69,7 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 	)
 }
 
-const ArticleView = ({ articleList }) => {
+const ArticleView = ({ articleList, selectedCategory }) => {
 	let BufferArticle = []
 
 	DataMockEnergy.articles.map(function (el) {
@@ -87,7 +91,7 @@ const ArticleView = ({ articleList }) => {
 	return (
 		<div className="min-h-screen flex flex-col pl-6 pr-6">
 			<h1 className="text-2xl font-light font-bold text-gray-200">
-				Latest
+				{selectedCategory.title}
 			</h1>
 			{BufferArticle}
 		</div>
@@ -101,7 +105,13 @@ CategoryMenu.propTypes = {
 			slug: PropTypes.string
 		}
 	)),
-	selectedCategory: PropTypes.string,
+	selectedCategory: PropTypes.shape(
+		{
+			name: PropTypes.string,
+			slug: PropTypes.string,
+			title: PropTypes.string
+		}
+	),
 	handleSelectCategory: PropTypes.func.isRequired
 }
 
@@ -112,7 +122,13 @@ ArticleView.propTypes = {
 			slug: PropTypes.string
 		}
 	)),
-	selectedCategory: PropTypes.string,
+	selectedCategory: PropTypes.shape(
+		{
+			name: PropTypes.string,
+			slug: PropTypes.string,
+			title: PropTypes.string
+		}
+	),
 }
 
 export default App;
