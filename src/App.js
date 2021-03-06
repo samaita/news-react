@@ -7,9 +7,9 @@ function App() {
 	const CategoryMenu = []
 	const ListCategory = ["All", "Space", "Energy", "Health", "IoT", "Artificial Intelligence", "Cybersecurity",]
 
-	ListCategory.map(function (el) {
+	ListCategory.map(function (el, index) {
 		CategoryMenu.push(
-			<li className="">
+			<li className={`${index === 0 ? "ml-5" : ""}`}>
 				<a className="border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block hover:bg-gray-200 text-gray-200 hover:text-black" href="#">{el}</a>
 			</li>)
 	})
