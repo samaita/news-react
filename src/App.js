@@ -1,8 +1,15 @@
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import PropTypes from 'prop-types';
+
 import './App.css';
 import DataMockEnergy from './mock/sample.energy.json';
-import axios from 'axios';
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import DataMockSpace from './mock/sample.space.json';
+import DataMockCybersecurity from './mock/sample.cybersecurity.json';
+import DataMockAI from './mock/sample.ai.json';
+import DataMockIoT from './mock/sample.iot.json';
+import DataMockHealth from './mock/sample.health.json';
 
 function App() {
 	return (
@@ -12,29 +19,37 @@ function App() {
 
 function Home() {
 	const [selectedCategory, setSelectedCategory] = useState(
-		{ name: "All", slug: "all", title: "Latest" }
+		{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles }
 	)
 	const [articleList, setArticleList] = useState([
-		{}
 	])
 	const [categories, setCategories] = useState([
-		{ name: "All", slug: "all", title: "Latest" },
-		{ name: "Space", slug: "space" },
-		{ name: "Energy", slug: "energy" },
-		{ name: "Health", slug: "health" },
-		{ name: "IoT", slug: "iot" },
-		{ name: "Artificial Intelligence", slug: "artificial-intelligence" },
-		{ name: "Cybersecurity", slug: "cybersecurity" },
+		{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles },
+		{ name: "Space", slug: "space", data: DataMockSpace.articles },
+		{ name: "Energy", slug: "energy", data: DataMockEnergy.articles },
+		{ name: "Health", slug: "health", data: DataMockHealth.articles },
+		{ name: "IoT", slug: "iot", data: DataMockIoT.articles },
+		{ name: "Artificial Intelligence", slug: "artificial-intelligence", data: DataMockAI.articles },
+		{ name: "Cybersecurity", slug: "cybersecurity", data: DataMockCybersecurity.articles },
 	])
 
 	const handleSelectCategory = e => {
 		setSelectedCategory(e)
+
 		// 	axios.get(`https://jsonplaceholder.typicode.com/users`)
 		// 		.then(res => {
 		// 			const persons = res.data;
 		// 			this.setState({ persons });
 		// 		})
+
+		setArticleList(e.data)
 	}
+
+	useEffect(() => {
+		if (articleList && articleList.length <= 0) {
+			handleSelectCategory(selectedCategory)
+		}
+	})
 
 	return (
 		<div className="App bg-black pt-4">
@@ -70,12 +85,12 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 }
 
 const ArticleView = ({ articleList, selectedCategory }) => {
-	let BufferArticle = []
+	let LayoutArticle = []
 
-	DataMockEnergy.articles.map(function (el) {
-		let hasDefaultImage = el.urlToImage.includes("default")
+	articleList.map(function (el) {
+		let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
 
-		BufferArticle.push(
+		LayoutArticle.push(
 			<div className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-4">
 				<div id="header" className="flex flex-col">
 					<div className="bg-gray-100 w-full h-48 max-h-96 block rounded-md bg-cover" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
@@ -91,9 +106,9 @@ const ArticleView = ({ articleList, selectedCategory }) => {
 	return (
 		<div className="min-h-screen flex flex-col pl-6 pr-6">
 			<h1 className="text-2xl font-light font-bold text-gray-200">
-				{selectedCategory.title}
+				{selectedCategory.title ? selectedCategory.title : selectedCategory.name}
 			</h1>
-			{BufferArticle}
+			{LayoutArticle}
 		</div>
 	)
 }
@@ -118,10 +133,16 @@ CategoryMenu.propTypes = {
 ArticleView.propTypes = {
 	articleList: PropTypes.arrayOf(PropTypes.shape(
 		{
-			name: PropTypes.string,
-			slug: PropTypes.string
+			title: PropTypes.string,
+			urlToImage: PropTypes.string,
+			source: PropTypes.shape(
+				{
+					name: PropTypes.string
+				}
+			),
+			publishedAt: PropTypes.string
 		}
-	)),
+	)).isRequired,
 	selectedCategory: PropTypes.shape(
 		{
 			name: PropTypes.string,
