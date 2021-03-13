@@ -18,32 +18,46 @@ function App() {
 }
 
 function Home() {
-	const [selectedCategory, setSelectedCategory] = useState(
-		{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles }
-	)
-	const [articleList, setArticleList] = useState([
-	])
-	const [categories, setCategories] = useState([
-		{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles },
-		{ name: "Space", slug: "space", data: DataMockSpace.articles },
-		{ name: "Energy", slug: "energy", data: DataMockEnergy.articles },
-		{ name: "Health", slug: "health", data: DataMockHealth.articles },
-		{ name: "IoT", slug: "iot", data: DataMockIoT.articles },
-		{ name: "Artificial Intelligence", slug: "artificial-intelligence", data: DataMockAI.articles },
-		{ name: "Cybersecurity", slug: "cybersecurity", data: DataMockCybersecurity.articles },
-	])
+	const
+		[mockData, setMockData] = useState(true),
+		[keyAPI, setKeyAPI] = useState({
+			"newsAPI": process.env.REACT_APP_NEWS_API_KEY /* please move it to a secure backend */
+		}),
+		[selectedCategory, setSelectedCategory] = useState({
+			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles
+		}),
+		[articleList, setArticleList] = useState([]),
+		[categories, setCategories] = useState([
+			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, },
+			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan" },
+			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
+			{ name: "Health", slug: "health", data: DataMockHealth.articles, keyword: "health AND -biden" },
+			{ name: "IoT", slug: "iot", data: DataMockIoT.articles, keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
+			{ name: "Artificial Intelligence", slug: "artificial-intelligence", data: DataMockAI.articles, keyword: "artificial intelligence OR neural network OR auto pilot" },
+			{ name: "Cybersecurity", slug: "cybersecurity", data: DataMockCybersecurity.articles, keyword: "hacker OR cyber security" },
+		])
 
-	const handleSelectCategory = e => {
-		setSelectedCategory(e)
+	const
+		handleSelectCategory = e => {
+			setSelectedCategory(e)
 
-		// 	axios.get(`https://jsonplaceholder.typicode.com/users`)
-		// 		.then(res => {
-		// 			const persons = res.data;
-		// 			this.setState({ persons });
-		// 		})
+			if (mockData) {
+				setArticleList(e.data)
+			} else {
+				// 	axios.get(`https://jsonplaceholder.typicode.com/users`)
+				// 		.then(res => {
+				// 			const persons = res.data;
+				// 			this.setState({ persons });
+				// 		})
+				console.log("USE AXIOS")
+				setArticleList(e.data)
+			}
 
-		setArticleList(e.data)
-	}
+		},
+		handleSetMockData = e => {
+			setMockData(e)
+		}
+
 
 	useEffect(() => {
 		if (articleList && articleList.length <= 0) {
@@ -60,6 +74,20 @@ function Home() {
 			<ArticleView
 				articleList={articleList}
 				selectedCategory={selectedCategory} />
+			<FloatingMenu
+				mockData={mockData}
+				handleSetMockData={handleSetMockData} />
+		</div>
+	)
+}
+
+const FloatingMenu = ({ mockData, handleSetMockData }) => {
+	return (
+		<div className="fixed right-0 bottom-0 mb-3 mr-3">
+			<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+				<input defaultChecked={mockData} onClick={() => handleSetMockData(!mockData)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+				<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
+			</div>
 		</div>
 	)
 }
