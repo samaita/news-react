@@ -24,11 +24,13 @@ function Home() {
 			newsURLEverything: "https://newsapi.org/v2/everything",
 			defaultErrorMessage: "Maaf, Silahkan coba kembali setelah beberapa saat.",
 			timeout: 10000,
-			maxToast: 3
+			maxToast: 3,
+			pageSize: 10
 		}),
 		[cache, setCache] = useState({
 			useMock: true,
-			idToast: 0
+			idToast: 0,
+			pageNumber: 1
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles
@@ -58,17 +60,19 @@ function Home() {
 				axios.get(config.newsURLEverything, {
 					headers: {
 						"X-API-KEY": config.newsAPIAuthKey
+					},
+					params: {
+						q: e.keyword,
+						pageSize: config.PageSize,
+						page: cache.pageNumber
 					}
 				}).then(res => {
-					console.log(res)
+					setArticleList(res.data.articles)
 				}).catch(err => {
-					if (err.response.status !== 200) {
+					if (err.response && err.response.status !== 200) {
 						handlePushToast("error", err.response.message)
-					} else {
 					}
 				})
-
-				setArticleList(e.data)
 			}
 
 		},
@@ -87,9 +91,9 @@ function Home() {
 
 			handleSetCache("idToast", newToastID)
 
-			setTimeout((idToRemove) => {
-				handleRemoveToast(idToRemove)
-			}, config.timeout, newToastID);
+			if (currentToast.length >= config.maxToast) {
+				currentToast.shift()
+			}
 
 			currentToast.push(newToast)
 			setToast(currentToast)
@@ -100,12 +104,12 @@ function Home() {
 				mark = 0
 
 			for (let i = 0; i < currentToast.length; i++) {
-				if (currentToast[i] && currentToast[i].id <= idToRemove) {
-					mark++
-					continue
+				if (currentToast[i] && currentToast[i].id === idToRemove) {
+					mark = i
+					break
 				}
 			}
-			currentToast.splice(0, mark)
+			currentToast.splice(mark, 1)
 			setToast(currentToast)
 		}
 
@@ -138,10 +142,9 @@ function Home() {
 }
 
 const Toast = ({ maxToast, toast, handleRemoveToast }) => {
-	let renderToast = toast.slice(Math.max(toast.length - maxToast, 1))
 	return (
 		<div className="fixed left-0 p-2 w-full bottom-0" >
-			{renderToast && renderToast.map(function (data) {
+			{toast && toast.map(function (data) {
 				return (
 					<div className="flex items-center bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
 						<div className="flex item-center text-white text-sm content-cente">
