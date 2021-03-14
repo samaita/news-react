@@ -47,6 +47,9 @@ function Home() {
 
 	const
 		handleSelectCategory = e => {
+			if (selectedCategory.slug === e.slug) {
+				return
+			}
 			setSelectedCategory(e)
 
 			if (cache.useMock) {
