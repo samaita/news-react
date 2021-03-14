@@ -19,9 +19,11 @@ function App() {
 
 function Home() {
 	const
-		[mockData, setMockData] = useState(true),
-		[keyAPI, setKeyAPI] = useState({
-			"newsAPI": process.env.REACT_APP_NEWS_API_KEY /* please move it to a secure backend */
+		[config, setConfig] = useState({
+			newsAPI: process.env.REACT_APP_NEWS_API_KEY /* please move it to a secure backend */
+		}),
+		[cache, setCache] = useState({
+			useMock: true,
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles
@@ -41,7 +43,7 @@ function Home() {
 		handleSelectCategory = e => {
 			setSelectedCategory(e)
 
-			if (mockData) {
+			if (cache.useMock) {
 				setArticleList(e.data)
 			} else {
 				// 	axios.get(`https://jsonplaceholder.typicode.com/users`)
@@ -54,8 +56,9 @@ function Home() {
 			}
 
 		},
-		handleSetMockData = e => {
-			setMockData(e)
+		handleSetCache = (e, v) => {
+			cache[e] = v
+			setCache(cache)
 		}
 
 
@@ -75,17 +78,17 @@ function Home() {
 				articleList={articleList}
 				selectedCategory={selectedCategory} />
 			<FloatingMenu
-				mockData={mockData}
-				handleSetMockData={handleSetMockData} />
+				cache={cache}
+				handleSetCache={handleSetCache} />
 		</div>
 	)
 }
 
-const FloatingMenu = ({ mockData, handleSetMockData }) => {
+const FloatingMenu = ({ cache, handleSetCache }) => {
 	return (
 		<div className="fixed right-0 bottom-0 mb-3 mr-3">
 			<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-				<input defaultChecked={mockData} onClick={() => handleSetMockData(!mockData)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+				<input defaultChecked={cache} onClick={() => handleSetCache("useMock", !cache.useMock)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
 				<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
 			</div>
 		</div>
@@ -178,6 +181,15 @@ ArticleView.propTypes = {
 			title: PropTypes.string
 		}
 	),
+}
+
+FloatingMenu.propTypes = {
+	cache: PropTypes.shape(
+		{
+			useMock: PropTypes.bool,
+		}
+	),
+	handleSetCache: PropTypes.func.isRequired
 }
 
 export default App;
