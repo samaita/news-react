@@ -20,10 +20,15 @@ function App() {
 function Home() {
 	const
 		[config, setConfig] = useState({
-			newsAPI: process.env.REACT_APP_NEWS_API_KEY /* please move it to a secure backend */
+			newsAPIAuthKey: process.env.REACT_APP_NEWS_API_KEY, /* please move it to a secure backend */
+			newsURLEverything: "https://newsapi.org/v2/everything",
+			defaultErrorMessage: "Maaf, Silahkan coba kembali setelah beberapa saat.",
+			timeout: 10000,
+			maxToast: 3
 		}),
 		[cache, setCache] = useState({
 			useMock: true,
+			idToast: 0
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles
@@ -37,7 +42,8 @@ function Home() {
 			{ name: "IoT", slug: "iot", data: DataMockIoT.articles, keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
 			{ name: "Artificial Intelligence", slug: "artificial-intelligence", data: DataMockAI.articles, keyword: "artificial intelligence OR neural network OR auto pilot" },
 			{ name: "Cybersecurity", slug: "cybersecurity", data: DataMockCybersecurity.articles, keyword: "hacker OR cyber security" },
-		])
+		]),
+		[toast, setToast] = useState([])
 
 	const
 		handleSelectCategory = e => {
@@ -46,12 +52,21 @@ function Home() {
 			if (cache.useMock) {
 				setArticleList(e.data)
 			} else {
-				// 	axios.get(`https://jsonplaceholder.typicode.com/users`)
-				// 		.then(res => {
-				// 			const persons = res.data;
-				// 			this.setState({ persons });
-				// 		})
-				console.log("USE AXIOS")
+				axios.get(config.newsURLEverything,
+					{
+						headers: {
+							"X-API-KEY": config.newsAPIAuthKey
+						}
+					}
+				).then(res =>
+					console.log(res)
+				).catch(err => {
+					if (err.response.status !== 200) {
+						handlePushToast("error", err.response.message)
+					} else {
+					}
+				})
+
 				setArticleList(e.data)
 			}
 
@@ -59,8 +74,39 @@ function Home() {
 		handleSetCache = (e, v) => {
 			cache[e] = v
 			setCache(cache)
-		}
+		},
+		handlePushToast = (type, message) => {
+			let newToastID = cache.idToast + 1,
+				newToast = {
+					id: newToastID,
+					type: type,
+					message: (!message) ? config.defaultErrorMessage + newToastID : message,
+				},
+				currentToast = [...toast]
 
+			handleSetCache("idToast", newToastID)
+
+			setTimeout((idToRemove) => {
+				handleRemoveToast(idToRemove)
+			}, config.timeout, newToastID);
+
+			currentToast.push(newToast)
+			setToast(currentToast)
+
+		},
+		handleRemoveToast = (idToRemove) => {
+			let currentToast = [...toast],
+				mark = 0
+
+			for (let i = 0; i < currentToast.length; i++) {
+				if (currentToast[i] && currentToast[i].id <= idToRemove) {
+					mark++
+					continue
+				}
+			}
+			currentToast.splice(0, mark)
+			setToast(currentToast)
+		}
 
 	useEffect(() => {
 		if (articleList && articleList.length <= 0) {
@@ -80,7 +126,28 @@ function Home() {
 			<FloatingMenu
 				cache={cache}
 				handleSetCache={handleSetCache} />
+			<Toast
+				maxToast={config.maxToast}
+				toast={toast}
+				handleRemoveToast={handleRemoveToast} />
 		</div>
+	)
+}
+
+const Toast = ({ maxToast, toast, handleRemoveToast }) => {
+	let renderToast = toast.slice(Math.max(toast.length - maxToast, 1))
+	return (
+		<div className="fixed left-0 p-2 w-full bottom-0" >
+			{renderToast && renderToast.map(function (data) {
+				return (
+					<div className="flex items-center bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
+						<div className="flex item-center text-white text-sm content-cente">
+							<div className="w-11/12">{data.message}</div><div onClick={() => handleRemoveToast(data.id)} className="w-1/12 text-center">OK</div>
+						</div>
+					</div>
+				)
+			}, this)}
+		</div >
 	)
 }
 
@@ -190,6 +257,18 @@ FloatingMenu.propTypes = {
 		}
 	),
 	handleSetCache: PropTypes.func.isRequired
+}
+
+Toast.propTypes = {
+	maxToast: PropTypes.number,
+	toast: PropTypes.arrayOf(PropTypes.shape(
+		{
+			id: PropTypes.number,
+			message: PropTypes.string,
+			type: PropTypes.string
+		}
+	)),
+	handleRemoveToast: PropTypes.func.isRequired
 }
 
 export default App;
