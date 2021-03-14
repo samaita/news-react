@@ -35,7 +35,7 @@ function Home() {
 		}),
 		[articleList, setArticleList] = useState([]),
 		[categories, setCategories] = useState([
-			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, },
+			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles },
 			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan" },
 			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
 			{ name: "Health", slug: "health", data: DataMockHealth.articles, keyword: "health AND -biden" },
@@ -55,15 +55,13 @@ function Home() {
 			if (cache.useMock) {
 				setArticleList(e.data)
 			} else {
-				axios.get(config.newsURLEverything,
-					{
-						headers: {
-							"X-API-KEY": config.newsAPIAuthKey
-						}
+				axios.get(config.newsURLEverything, {
+					headers: {
+						"X-API-KEY": config.newsAPIAuthKey
 					}
-				).then(res =>
+				}).then(res => {
 					console.log(res)
-				).catch(err => {
+				}).catch(err => {
 					if (err.response.status !== 200) {
 						handlePushToast("error", err.response.message)
 					} else {
@@ -113,7 +111,9 @@ function Home() {
 
 	useEffect(() => {
 		if (articleList && articleList.length <= 0) {
-			handleSelectCategory(selectedCategory)
+			let initCategory = { ...selectedCategory }
+			initCategory.slug = "init"
+			handleSelectCategory(initCategory)
 		}
 	})
 
@@ -171,7 +171,7 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 			<ul className="flex flex-row overflow-x-scroll hide-scroll-bar">
 				{categories.map(function (category, index) {
 					let isFirst = index === 0;
-					let isSelected = category.slug === selectedCategory.slug;
+					let isSelected = category.slug === selectedCategory.slug || (isFirst && selectedCategory.slug === "init");
 					return (
 						<li className={`${isFirst ? "ml-5" : ""}`}>
 							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href="#" onClick={() => handleSelectCategory(category)}>
