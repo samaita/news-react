@@ -30,14 +30,15 @@ function Home() {
 		[cache, setCache] = useState({
 			useMock: true,
 			idToast: 0,
-			pageNumber: 1
+			pageNumber: 1,
+			hasNext: false
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
-			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles
+			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
 		[articleList, setArticleList] = useState([]),
 		[categories, setCategories] = useState([
-			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles },
+			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
 			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan" },
 			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
 			{ name: "Health", slug: "health", data: DataMockHealth.articles, keyword: "health AND -biden" },
@@ -53,28 +54,41 @@ function Home() {
 				return
 			}
 			setSelectedCategory(e)
+			handleSetCache("pageNumber", 1)
 
 			if (cache.useMock) {
 				setArticleList(e.data)
 			} else {
-				axios.get(config.newsURLEverything, {
-					headers: {
-						"X-API-KEY": config.newsAPIAuthKey
-					},
-					params: {
-						q: e.keyword,
-						pageSize: config.PageSize,
-						page: cache.pageNumber
-					}
-				}).then(res => {
-					setArticleList(res.data.articles)
-				}).catch(err => {
-					if (err.response && err.response.status !== 200) {
-						handlePushToast("error", err.response.message)
-					}
-				})
+				handleGetArticle()
 			}
 
+		},
+		handleLoadMore = () => {
+			handleSetCache("pageNumber", cache.pageNumber + 1)
+			handleGetArticle()
+		},
+		handleGetArticle = () => {
+			axios.get(config.newsURLEverything, {
+				headers: {
+					"X-API-KEY": config.newsAPIAuthKey
+				},
+				params: {
+					q: selectedCategory.keyword,
+					page: cache.pageNumber,
+					pageSize: config.pageSize
+				}
+			}).then(res => {
+				setArticleList(res.data.articles)
+				if (res.data.totalResults > config.pageSize * cache.pageNumber) {
+					handleSetCache("hasNext", true)
+				} else {
+					handleSetCache("hasNext", false)
+				}
+			}).catch(err => {
+				if (err.response && err.response.status !== 200) {
+					handlePushToast("error", err.response.message)
+				}
+			})
 		},
 		handleSetCache = (e, v) => {
 			cache[e] = v
