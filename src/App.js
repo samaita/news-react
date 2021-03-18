@@ -25,7 +25,9 @@ function Home() {
 			defaultErrorMessage: "Maaf, Silahkan coba kembali setelah beberapa saat.",
 			timeout: 10000,
 			maxToast: 3,
-			pageSize: 10
+			pageSize: 10,
+			sortBy: "publishedAt",
+			language: "en"
 		}),
 		[cache, setCache] = useState({
 			useMock: true,
@@ -76,7 +78,9 @@ function Home() {
 				params: {
 					q: selectedCategory.keyword,
 					page: cache.pageNumber,
-					pageSize: config.pageSize
+					pageSize: config.pageSize,
+					sortBy: config.sortBy,
+					language: config.language
 				}
 			}).then(res => {
 				handleSetCache("isLoading", !cache.isLoading)
