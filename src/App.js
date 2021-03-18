@@ -31,7 +31,8 @@ function Home() {
 			useMock: true,
 			idToast: 0,
 			pageNumber: 1,
-			hasNext: false
+			hasNext: false,
+			isLoading: false
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
@@ -61,13 +62,13 @@ function Home() {
 			} else {
 				handleGetArticle()
 			}
-
 		},
 		handleLoadMore = () => {
 			handleSetCache("pageNumber", cache.pageNumber + 1)
 			handleGetArticle()
 		},
 		handleGetArticle = () => {
+			handleSetCache("isLoading", !cache.isLoading)
 			axios.get(config.newsURLEverything, {
 				headers: {
 					"X-API-KEY": config.newsAPIAuthKey
@@ -78,6 +79,7 @@ function Home() {
 					pageSize: config.pageSize
 				}
 			}).then(res => {
+				handleSetCache("isLoading", !cache.isLoading)
 				setArticleList(res.data.articles)
 				if (res.data.totalResults > config.pageSize * cache.pageNumber) {
 					handleSetCache("hasNext", true)
@@ -85,14 +87,16 @@ function Home() {
 					handleSetCache("hasNext", false)
 				}
 			}).catch(err => {
+				handleSetCache("isLoading", !cache.isLoading)
 				if (err.response && err.response.status !== 200) {
 					handlePushToast("error", err.response.message)
 				}
 			})
 		},
 		handleSetCache = (e, v) => {
-			cache[e] = v
-			setCache(cache)
+			let newCache = cache;
+			newCache[e] = v
+			setCache(newCache)
 		},
 		handlePushToast = (type, message) => {
 			let newToastID = cache.idToast + 1,
@@ -148,14 +152,28 @@ function Home() {
 				cache={cache}
 				handleSetCache={handleSetCache} />
 			<Toast
-				maxToast={config.maxToast}
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
+			<Loading
+				show={cache.isLoading} />
 		</div>
 	)
 }
 
-const Toast = ({ maxToast, toast, handleRemoveToast }) => {
+const Loading = ({ show }) => {
+	return (
+		<div>
+			{show && <div className="flex h-screen w-screen fixed top-0 bg-black bg-opacity-70">
+				<div className="m-auto">
+					<div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32">
+					</div>
+				</div>
+			</div>}
+		</div>
+	)
+}
+
+const Toast = ({ toast, handleRemoveToast }) => {
 	return (
 		<div className="fixed left-0 p-2 w-full bottom-0" >
 			{toast && toast.map(function (data) {
@@ -280,7 +298,6 @@ FloatingMenu.propTypes = {
 }
 
 Toast.propTypes = {
-	maxToast: PropTypes.number,
 	toast: PropTypes.arrayOf(PropTypes.shape(
 		{
 			id: PropTypes.number,
@@ -289,6 +306,10 @@ Toast.propTypes = {
 		}
 	)),
 	handleRemoveToast: PropTypes.func.isRequired
+}
+
+Loading.propTypes = {
+	show: PropTypes.bool
 }
 
 export default App;
