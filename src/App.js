@@ -10,6 +10,7 @@ import DataMockCybersecurity from './mock/sample.cybersecurity.json';
 import DataMockAI from './mock/sample.ai.json';
 import DataMockIoT from './mock/sample.iot.json';
 import DataMockHealth from './mock/sample.health.json';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 function App() {
 	return (
@@ -34,7 +35,8 @@ function Home() {
 			idToast: 0,
 			pageNumber: 1,
 			hasNext: false,
-			isLoading: false
+			isLoading: false,
+			nextPageNumber: 2
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
@@ -42,7 +44,7 @@ function Home() {
 		[articleList, setArticleList] = useState([]),
 		[categories, setCategories] = useState([
 			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
-			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan" },
+			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "nasa OR spacex OR perseverance OR mars OR lapan" },
 			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
 			{ name: "Health", slug: "health", data: DataMockHealth.articles, keyword: "health AND -biden" },
 			{ name: "IoT", slug: "iot", data: DataMockIoT.articles, keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
@@ -56,42 +58,59 @@ function Home() {
 			if (selectedCategory.slug === e.slug) {
 				return
 			}
+
 			setSelectedCategory(e)
+
 			handleSetCache("pageNumber", 1)
+			handleSetCache("nextPageNumber", 1)
 
 			if (cache.useMock) {
 				setArticleList(e.data)
 			} else {
-				handleGetArticle()
+				handleGetArticle(e)
 			}
 		},
-		handleLoadMore = () => {
-			handleSetCache("pageNumber", cache.pageNumber + 1)
-			handleGetArticle()
-		},
-		handleGetArticle = () => {
+		handleGetArticle = (e) => {
+			if (cache.isLoading || cache.useMock) {
+				return
+			}
+
+			if (!e) {
+				e = selectedCategory
+			}
+
 			handleSetCache("isLoading", !cache.isLoading)
+
 			axios.get(config.newsURLEverything, {
 				headers: {
 					"X-API-KEY": config.newsAPIAuthKey
 				},
 				params: {
-					q: selectedCategory.keyword,
-					page: cache.pageNumber,
+					qInTitle: e.keyword,
+					page: cache.nextPageNumber,
 					pageSize: config.pageSize,
 					sortBy: config.sortBy,
 					language: config.language
 				}
 			}).then(res => {
 				handleSetCache("isLoading", !cache.isLoading)
-				setArticleList(res.data.articles)
+
+				if (cache.nextPageNumber > 1) {
+					setArticleList([...articleList, ...res.data.articles])
+				} else {
+					setArticleList(res.data.articles)
+				}
+
 				if (res.data.totalResults > config.pageSize * cache.pageNumber) {
 					handleSetCache("hasNext", true)
 				} else {
 					handleSetCache("hasNext", false)
 				}
+				handleSetCache("pageNumber", cache.nextPageNumber)
+				handleSetCache("nextPageNumber", cache.nextPageNumber + 1)
 			}).catch(err => {
 				handleSetCache("isLoading", !cache.isLoading)
+
 				if (err.response && err.response.status !== 200) {
 					handlePushToast("error", err.response.message)
 				}
@@ -151,7 +170,8 @@ function Home() {
 				handleSelectCategory={handleSelectCategory} />
 			<ArticleView
 				articleList={articleList}
-				selectedCategory={selectedCategory} />
+				selectedCategory={selectedCategory}
+				handleGetArticle={handleGetArticle} />
 			<FloatingMenu
 				useMock={cache.useMock}
 				handleSetCache={handleSetCache} />
@@ -167,12 +187,7 @@ function Home() {
 const Loading = ({ show }) => {
 	return (
 		<div>
-			{show && <div className="flex h-screen w-screen fixed top-0 bg-black bg-opacity-70">
-				<div className="m-auto">
-					<div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32">
-					</div>
-				</div>
-			</div>}
+			{show && Loader}
 		</div>
 	)
 }
@@ -224,7 +239,16 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 	)
 }
 
-const ArticleView = ({ articleList, selectedCategory }) => {
+const Loader = (
+	<div className="flex h-screen w-screen fixed top-0 bg-black bg-opacity-70">
+		<div className="m-auto">
+			<div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32">
+			</div>
+		</div>
+	</div>
+)
+
+const ArticleView = ({ articleList, selectedCategory, handleGetArticle }) => {
 	let LayoutArticle = []
 
 	articleList.map(function (el) {
@@ -248,7 +272,26 @@ const ArticleView = ({ articleList, selectedCategory }) => {
 			<h1 className="text-2xl font-light font-bold text-gray-200">
 				{selectedCategory.title ? selectedCategory.title : selectedCategory.name}
 			</h1>
-			{LayoutArticle}
+
+			<InfiniteScroll
+				dataLength={articleList.length} //This is important field to render the next data
+				next={handleGetArticle}
+				hasMore={true}
+				loader={Loader}
+				// below props only if you need pull down functionality
+				refreshFunction={handleGetArticle}
+				pullDownToRefresh
+				pullDownToRefreshThreshold={50}
+				pullDownToRefreshContent={
+					<h3 style={{ textAlign: 'center' }}>&#8595; Pull down to refresh</h3>
+				}
+				releaseToRefreshContent={
+					<h3 style={{ textAlign: 'center' }}>&#8593; Release to refresh</h3>
+				}
+			>
+				{LayoutArticle}
+			</InfiniteScroll>
+
 		</div>
 	)
 }
