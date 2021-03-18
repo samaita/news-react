@@ -149,7 +149,7 @@ function Home() {
 				articleList={articleList}
 				selectedCategory={selectedCategory} />
 			<FloatingMenu
-				cache={cache}
+				useMock={cache.useMock}
 				handleSetCache={handleSetCache} />
 			<Toast
 				toast={toast}
@@ -189,11 +189,11 @@ const Toast = ({ toast, handleRemoveToast }) => {
 	)
 }
 
-const FloatingMenu = ({ cache, handleSetCache }) => {
+const FloatingMenu = ({ useMock, handleSetCache }) => {
 	return (
 		<div className="fixed right-0 bottom-0 mb-3 mr-3">
 			<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-				<input defaultChecked={cache} onClick={() => handleSetCache("useMock", !cache.useMock)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+				<input defaultChecked={useMock} onClick={() => handleSetCache("useMock", !useMock)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
 				<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
 			</div>
 		</div>
@@ -289,11 +289,7 @@ ArticleView.propTypes = {
 }
 
 FloatingMenu.propTypes = {
-	cache: PropTypes.shape(
-		{
-			useMock: PropTypes.bool,
-		}
-	),
+	useMock: PropTypes.bool,
 	handleSetCache: PropTypes.func.isRequired
 }
 
