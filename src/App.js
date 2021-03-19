@@ -28,7 +28,8 @@ function Home() {
 			maxToast: 3,
 			pageSize: 10,
 			sortBy: "publishedAt",
-			language: "en"
+			language: "en",
+			maxCharDescription: 150
 		}),
 		[cache, setCache] = useState({
 			useMock: true,
@@ -183,6 +184,7 @@ function Home() {
 				useMock={cache.useMock}
 				articleList={articleList}
 				selectedCategory={selectedCategory}
+				maxCharDescription={config.maxCharDescription}
 				handleGetArticle={handleGetArticle}
 				handleTimeFormat={handleTimeFormat} />
 			<FloatingMenu
@@ -261,20 +263,22 @@ const Loader = (
 	</div>
 )
 
-const ArticleView = ({ useMock, articleList, selectedCategory, handleGetArticle, handleTimeFormat }) => {
+const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
 	let LayoutArticle = []
 
 	articleList.map(function (el) {
 		let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
 
 		LayoutArticle.push(
-			<div className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-4">
+			<div className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2">
 				<div id="header" className="flex flex-col">
 					<div className="bg-gray-100 w-full h-48 max-h-96 block rounded-md bg-cover" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
 					<div id="body" className="flex flex-col w-full h-full p-3">
-						<h2 id="category" className="font-light text-green-500 leading-5 text-sm">{el.source.name}</h2>
-						<h1 id="title" className="mb-1 text-lg leading-5 text-gray-200">{el.title}</h1>
-						<h6 id="timestamp" className="text-xs font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}</h6>
+						<h2 id="site" className="font-light text-green-500 leading-5 text-sm"><a href={el.url}>{el.source.name}</a></h2>
+						<h1 id="title" className="mb-1 text-xl leading-5 text-gray-100">{el.title}</h1>
+						<h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
+						<p className="text-white text-base font-light mt-1 mb-2">{el.description.length > maxCharDescription ? el.description.substring(0, maxCharDescription) + "..." : el.description}</p>
+						<a className="text-green-500 block w-full border-2 rounded-md p-2 text-center border-green-500" href={el.url}>Read More</a>
 					</div>
 				</div>
 			</div >)
