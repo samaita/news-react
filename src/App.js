@@ -20,7 +20,7 @@ function App() {
 
 function Home() {
 	const
-		[config, setConfig] = useState({
+		[config] = useState({
 			newsAPIAuthKey: process.env.REACT_APP_NEWS_API_KEY, /* please move it to a secure backend */
 			newsURLEverything: "https://newsapi.org/v2/everything",
 			defaultErrorMessage: "Maaf, Silahkan coba kembali setelah beberapa saat.",
@@ -43,7 +43,7 @@ function Home() {
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
 		[articleList, setArticleList] = useState([]),
-		[categories, setCategories] = useState([
+		[categories] = useState([
 			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
 			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "nasa OR spacex OR perseverance OR mars OR lapan" },
 			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
@@ -226,9 +226,9 @@ const Toast = ({ toast, handleRemoveToast }) => {
 const FloatingMenu = ({ useMock, handleSetCache }) => {
 	return (
 		<div className="fixed right-0 bottom-0 mb-3 mr-3">
-			<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-				<input defaultChecked={useMock} onClick={() => handleSetCache("useMock", !useMock)} type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
-				<label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
+			<div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+				<input defaultChecked={useMock} onClick={() => handleSetCache("useMock", !useMock)} type="checkbox" name="toggle" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+				<label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
 			</div>
 		</div>
 	)
@@ -242,8 +242,8 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 					let isFirst = index === 0;
 					let isSelected = category.slug === selectedCategory.slug || (isFirst && selectedCategory.slug === "init");
 					return (
-						<li className={`${isFirst ? "ml-5" : ""}`}>
-							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href="#" onClick={() => handleSelectCategory(category)}>
+						<li key={category.slug} className={`${isFirst ? "ml-5" : ""}`}>
+							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href={"#" + category.slug} onClick={() => handleSelectCategory(category)}>
 								{category.name}
 							</a>
 						</li>
@@ -266,11 +266,11 @@ const Loader = (
 const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
 	let LayoutArticle = []
 
-	articleList.map(function (el) {
+	articleList.map(function (el, index) {
 		let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
 
 		LayoutArticle.push(
-			<div className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2">
+			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2">
 				<div id="header" className="flex flex-col">
 					<div className="bg-gray-100 w-full h-48 max-h-96 block rounded-md bg-cover" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
 					<div id="body" className="flex flex-col w-full h-full p-3">
@@ -282,6 +282,8 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 					</div>
 				</div>
 			</div >)
+
+		return LayoutArticle
 	})
 
 	return (
@@ -350,6 +352,8 @@ ArticleView.propTypes = {
 			title: PropTypes.string
 		}
 	),
+	handleGetArticle: PropTypes.func.isRequired,
+	handleTimeFormat: PropTypes.func.isRequired
 }
 
 FloatingMenu.propTypes = {
