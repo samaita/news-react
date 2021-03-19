@@ -152,6 +152,17 @@ function Home() {
 			}
 			currentToast.splice(mark, 1)
 			setToast(currentToast)
+		},
+		handleTimeFormat = (unix) => {
+			let t = new Date(unix);
+			let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			let year = t.getFullYear();
+			let month = months[t.getMonth()];
+			let date = t.getDate();
+			let hour = t.getHours() < 10 ? "0" + t.getHours() : t.getHours();
+			let min = t.getMinutes() < 10 ? "0" + t.getMinutes() : t.getMinutes();
+			let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
+			return time;
 		}
 
 	useEffect(() => {
@@ -172,7 +183,8 @@ function Home() {
 				useMock={cache.useMock}
 				articleList={articleList}
 				selectedCategory={selectedCategory}
-				handleGetArticle={handleGetArticle} />
+				handleGetArticle={handleGetArticle}
+				handleTimeFormat={handleTimeFormat} />
 			<FloatingMenu
 				useMock={cache.useMock}
 				handleSetCache={handleSetCache} />
@@ -262,7 +274,7 @@ const ArticleView = ({ useMock, articleList, selectedCategory, handleGetArticle,
 					<div id="body" className="flex flex-col w-full h-full p-3">
 						<h2 id="category" className="font-light text-green-500 leading-5 text-sm">{el.source.name}</h2>
 						<h1 id="title" className="mb-1 text-lg leading-5 text-gray-200">{el.title}</h1>
-						<h6 id="timestamp" className="text-xs font-light text-gray-400 object-left-bottom">{el.publishedAt}</h6>
+						<h6 id="timestamp" className="text-xs font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}</h6>
 					</div>
 				</div>
 			</div >)
