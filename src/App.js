@@ -169,6 +169,7 @@ function Home() {
 				selectedCategory={selectedCategory}
 				handleSelectCategory={handleSelectCategory} />
 			<ArticleView
+				useMock={cache.useMock}
 				articleList={articleList}
 				selectedCategory={selectedCategory}
 				handleGetArticle={handleGetArticle} />
@@ -198,7 +199,7 @@ const Toast = ({ toast, handleRemoveToast }) => {
 			{toast && toast.map(function (data) {
 				return (
 					<div className="flex items-center bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
-						<div className="flex item-center text-white text-sm content-cente">
+						<div className="flex item-center text-white text-sm content-center">
 							<div className="w-11/12">{data.message}</div><div onClick={() => handleRemoveToast(data.id)} className="w-1/12 text-center">OK</div>
 						</div>
 					</div>
@@ -248,7 +249,7 @@ const Loader = (
 	</div>
 )
 
-const ArticleView = ({ articleList, selectedCategory, handleGetArticle }) => {
+const ArticleView = ({ useMock, articleList, selectedCategory, handleGetArticle, handleTimeFormat }) => {
 	let LayoutArticle = []
 
 	articleList.map(function (el) {
@@ -273,12 +274,11 @@ const ArticleView = ({ articleList, selectedCategory, handleGetArticle }) => {
 				{selectedCategory.title ? selectedCategory.title : selectedCategory.name}
 			</h1>
 
-			<InfiniteScroll
-				dataLength={articleList.length} //This is important field to render the next data
+			{!useMock && <InfiniteScroll
+				dataLength={articleList.length}
 				next={handleGetArticle}
 				hasMore={true}
 				loader={Loader}
-				// below props only if you need pull down functionality
 				refreshFunction={handleGetArticle}
 				pullDownToRefresh
 				pullDownToRefreshThreshold={50}
@@ -287,10 +287,10 @@ const ArticleView = ({ articleList, selectedCategory, handleGetArticle }) => {
 				}
 				releaseToRefreshContent={
 					<h3 style={{ textAlign: 'center' }}>&#8593; Release to refresh</h3>
-				}
-			>
+				}>
 				{LayoutArticle}
-			</InfiniteScroll>
+			</InfiniteScroll>}
+			{useMock && LayoutArticle}
 
 		</div>
 	)
@@ -314,6 +314,7 @@ CategoryMenu.propTypes = {
 }
 
 ArticleView.propTypes = {
+	useMock: PropTypes.bool,
 	articleList: PropTypes.arrayOf(PropTypes.shape(
 		{
 			title: PropTypes.string,
