@@ -27,7 +27,8 @@ function Home() {
 			timeout: 10000,
 			maxToast: 3,
 			pageSize: 10,
-			sortBy: "publishedAt",
+			sortByDate: "publishedAt",
+			sortByPopularity: "popularity",
 			language: "en",
 			maxCharDescription: 150
 		}),
@@ -37,12 +38,17 @@ function Home() {
 			pageNumber: 1,
 			hasNext: false,
 			isLoading: false,
-			nextPageNumber: 2
+			nextPageNumber: 2,
+			isTopArticleLoaded: false
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
 		[articleList, setArticleList] = useState([]),
+		[topCategory] = useState({
+			name: "Space", slug: "space", title: "Space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
+		}),
+		[topArticleList, setTopArticleList] = useState([]),
 		[categories] = useState([
 			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
 			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "nasa OR spacex OR perseverance OR mars OR lapan" },
@@ -70,6 +76,11 @@ function Home() {
 			} else {
 				handleGetArticle(e)
 			}
+
+			if (!cache.useMock && !cache.isTopArticleLoaded) {
+				handleGetTopArticle()
+				handleSetCache("isTopArticleLoaded", true)
+			}
 		},
 		handleGetArticle = (e) => {
 			if (cache.isLoading || cache.useMock) {
@@ -90,7 +101,7 @@ function Home() {
 					qInTitle: e.keyword,
 					page: cache.nextPageNumber,
 					pageSize: config.pageSize,
-					sortBy: config.sortBy,
+					sortBy: config.sortByDate,
 					language: config.language
 				}
 			}).then(res => {
@@ -112,6 +123,31 @@ function Home() {
 			}).catch(err => {
 				handleSetCache("isLoading", !cache.isLoading)
 
+				if (err.response && err.response.status !== 200) {
+					handlePushToast("error", err.response.message)
+				}
+			})
+		},
+		handleGetTopArticle = () => {
+			if (cache.useMock) {
+				setTopArticleList(topCategory.data)
+				return
+			}
+
+			axios.get(config.newsURLEverything, {
+				headers: {
+					"X-API-KEY": config.newsAPIAuthKey
+				},
+				params: {
+					qInTitle: topCategory.keyword,
+					page: 1,
+					pageSize: 1,
+					sortBy: config.sortByPopularity,
+					language: config.language
+				}
+			}).then(res => {
+				setTopArticleList(res.data.articles)
+			}).catch(err => {
 				if (err.response && err.response.status !== 200) {
 					handlePushToast("error", err.response.message)
 				}
@@ -172,13 +208,16 @@ function Home() {
 			initCategory.slug = "init"
 			handleSelectCategory(initCategory)
 		}
+		if (topArticleList && topArticleList.length <= 0) {
+			handleGetTopArticle()
+		}
 	})
 
 	return (
 		<div className="App bg-black">
 			<TrendingView
 				useMock={cache.useMock}
-				articleList={articleList}
+				articleList={topArticleList}
 				selectedCategory={selectedCategory}
 				maxCharDescription={config.maxCharDescription}
 				handleGetArticle={handleGetArticle}
@@ -277,14 +316,14 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 		let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
 
 		LayoutArticle.push(
-			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2">
+			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2 pl-6 pr-6">
 				<div id="header" className="flex flex-col">
 					<div className="bg-gray-100 w-full h-48 block rounded-md max-h-96 bg-cover" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
 					<div id="body" className="flex flex-col w-full h-full p-3">
 						<h2 id="site" className="font-light text-green-500 leading-5 text-sm"><a href={el.url}>{el.source.name}</a></h2>
-						<h1 id="title" className="mb-1 text-xl leading-5 text-gray-100">{el.title}</h1>
+						<h1 id="title" className="mb-1 text-2xl leading-7 text-gray-100">{el.title}</h1>
 						<h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
-						<p className="text-white text-base font-light mt-1 mb-2">{el.description.length > maxCharDescription ? el.description.substring(0, maxCharDescription) + "..." : el.description}</p>
+						<p className="text-white text-base font-light mt-1 mb-2">{el.description && el.description.length > maxCharDescription ? el.description.substring(0, maxCharDescription) + "..." : el.description}</p>
 						<a className="text-green-500 block w-full border-2 rounded-md p-2 text-center border-green-500" href={el.url}>Read More</a>
 					</div>
 				</div>
@@ -294,8 +333,8 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 	})
 
 	return (
-		<div className="min-h-screen flex flex-col pl-6 pr-6">
-			<h1 className="text-2xl font-light font-bold text-gray-200">
+		<div className="min-h-screen flex flex-col">
+			<h1 className="text-2xl font-light font-bold text-gray-200 pl-6 pr-6">
 				{selectedCategory.title ? selectedCategory.title : selectedCategory.name}
 			</h1>
 
@@ -335,9 +374,9 @@ const TrendingView = ({ useMock, articleList, selectedCategory, maxCharDescripti
 		LayoutArticle.push(
 			<div key={index} className="w-screen bg-black tracking-wide shadow mr-3 ">
 				<div id="header" className="flex flex-col relative">
-					<div className="bg-gray-100 w-screen h-96 block bg-cover" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
-					<div id="body" className="absolute flex flex-wrap content-center p-3 block w-screen h-64 bottom-0" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1))` }}>
-						<div className="content-center p-2">
+					<div className="bg-gray-100 w-screen h-96 block bg-cover bg-center" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
+					<div id="body" className="absolute flex flex-wrap content-end p-3 block w-screen h-64 bottom-0" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1))` }}>
+						<div className="p-2">
 							<h2 id="site" className="font-light text-green-500 mb-3 text-md"><a className="border pl-3 pt-2 pb-2 pr-3 rounded-xs whitespace-nowrap border-green-500 bg-green-500 text-gray-100" href={el.url}>{el.source.name}</a></h2>
 							<h1 id="title" className="font-semibold mb-1 text-3xl leading-7 text-gray-100">{el.title}</h1>
 							<h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
