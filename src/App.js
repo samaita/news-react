@@ -395,7 +395,7 @@ const TrendingView = ({ useMock, articleList, selectedCategory, maxCharDescripti
 
 		LayoutArticle.push(
 			<div key={index} className="w-screen bg-black tracking-wide shadow mr-3 ">
-				<div id="header" className="flex flex-col relative">
+				<div id="header" className="flex flex-col relative" onClick={() => window.location.href = el.url}>
 					<div className="bg-gray-100 w-screen h-96 block bg-cover bg-center" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}></div>
 					<div id="body" className="absolute flex flex-wrap content-end p-3 block w-screen h-64 bottom-0" style={{ backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1))` }}>
 						<div className="p-2">
