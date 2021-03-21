@@ -200,7 +200,7 @@ function Home() {
 		},
 		handleArticleSave = (saveData) => {
 			let newArticleList = []
-			let newArticleSaved = articleSaved
+			let newArticleSaved = { ...articleSaved }
 
 			articleList.map(function (el) {
 				if (el.url === saveData.url) {
@@ -247,6 +247,10 @@ function Home() {
 
 	return (
 		<div className="App bg-black">
+			<Header
+				cache={cache}
+				handleSetCache={handleSetCache}
+			/>
 			<TrendingView
 				useMock={cache.useMock}
 				articleList={topArticleList}
@@ -400,14 +404,30 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 	)
 }
 
+const Header = ({ cache, handleSetCache }) => {
+	return (
+		<div className="w-screen top-0 fixed bg-black h-16 z-10 border-b border-white">
+			<div className="h-12 w-12 text-gray-200 float-left" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-8 -12 36 36" stroke="currentColor">
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M4 6h16M4 12h16M4 18h16" />
+				</svg>
+			</div>
+			<div className="float-left text-white px-2 py-5">LOGO</div>
+			<div className="h-12 w-12 text-gray-200 float-right mr-2">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-8 -8 32 32" stroke="currentColor">
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+				</svg>
+			</div>
+		</div>
+	)
+}
+
 const SideMenu = ({ cache, handleSetCache }) => {
 	return (
 		<div>
 			{cache.isDisplayMenu && <div className="h-screen fixed bg-black shadow-lg w-80 top-0 z-40">
 				<ul>
-					<li className={`border-b border-gray-200 p-4 ${cache.selectedMenu === "home" ? "bg-green-500 text-black" : "text-gray-200 "}`} onClick={() => handleSetCache("selectedMenu", "home")}>Home</li>
-					<li className={`border-b border-gray-200 p-4 ${cache.selectedMenu === "saved-article" ? "bg-green-500 text-black" : "text-gray-200 "}`} onClick={() => handleSetCache("selectedMenu", "saved-article")}>Saved Article</li>
-					<li className={`border-b border-gray-200 p-4 text-gray-200`} onClick={() => handleSetCache("useMock", !cache.useMock)}>Use Mock
+					<li className={`border-b border-gray-200 p-4 text-gray-200`} onClick={() => handleSetCache("useMock", !cache.useMock)}>Mock Data Source
 						<div className="mb-3 mr-3 float-right">
 							<div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
 								<input checked={cache.useMock} type="checkbox" name="toggle" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" readOnly={true} />
@@ -415,9 +435,10 @@ const SideMenu = ({ cache, handleSetCache }) => {
 							</div>
 						</div>
 					</li>
+					<li className={`border-b border-gray-200 p-4 text-gray-200`} onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}>Close</li>
 				</ul>
 			</div>}
-			{cache.isDisplayMenu && <div className="fixed bg-black bg-opacity-70 h-screen w-screen top-0" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}></div>}
+			{cache.isDisplayMenu && <div className="fixed bg-black bg-opacity-70 h-screen w-screen top-0 z-30" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}></div>}
 		</div>
 	)
 }
@@ -481,7 +502,7 @@ const TrendingView = ({ useMock, articleList, selectedCategory, maxCharDescripti
 	})
 
 	return (
-		<div className="block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
+		<div className="mt-16 block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
 			{LayoutArticle}
 		</div>
 	)
