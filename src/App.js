@@ -11,6 +11,7 @@ import DataMockAI from './mock/sample.ai.json';
 import DataMockIoT from './mock/sample.iot.json';
 import DataMockHealth from './mock/sample.health.json';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { RWebShare } from 'react-web-share';
 
 function App() {
 	return (
@@ -320,6 +321,8 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 				<div id="header" className="flex flex-col">
 					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}>
 						<ActionButton
+							type="share"
+							shareData={el}
 							viewBox="-7 -7 40 40"
 							data="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
 						/>
@@ -369,16 +372,32 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 	)
 }
 
-const ActionButton = ({ selected, viewBox, fill, stroke, data }) => {
+const ActionButton = ({ type, shareData, selected, viewBox, data }) => {
 	let fillValue = selected ? "#10B981" : "none"
 	let strokeValue = selected ? "#10B981" : "currentColor"
+	let useShare = type === "share" ? true : false
 
-	return (
-		<span className="block w-14 h-14 -mb-7 mr-2 bg-black text-gray-200 block rounded-full">
+	let defaultButton = <button className="w-14 h-14">
+		<span className="block bg-black text-gray-200 block rounded-full">
 			<svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox={viewBox} stroke={strokeValue}>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d={data} />
+				<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.5" d={data} />
 			</svg>
 		</span>
+	</button>
+
+	return (
+		<div className="-mb-9 mr-2">
+			{useShare && <RWebShare
+				data={{
+					text: shareData.title,
+					url: shareData.url,
+					title: shareData.title,
+				}}>
+				{defaultButton}
+			</RWebShare>
+			}
+			{!useShare && defaultButton}
+		</div>
 	)
 }
 
