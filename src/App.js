@@ -41,7 +41,9 @@ function Home() {
 			hasNext: false,
 			isLoading: false,
 			nextPageNumber: 2,
-			isTopArticleLoaded: false
+			isTopArticleLoaded: false,
+			selectedMenu: "home",
+			isDisplayMenu: true
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
@@ -160,7 +162,7 @@ function Home() {
 			})
 		},
 		handleSetCache = (e, v) => {
-			let newCache = cache
+			let newCache = { ...cache }
 			newCache[e] = v
 			setCache(newCache)
 		},
@@ -265,14 +267,15 @@ function Home() {
 				handleGetArticle={handleGetArticle}
 				handleTimeFormat={handleTimeFormat}
 				handleArticleSave={handleArticleSave} />
-			<FloatingMenu
-				useMock={cache.useMock}
-				handleSetCache={handleSetCache} />
 			<Toast
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
 			<Loading
 				show={cache.isLoading} />
+			<SideMenu
+				cache={cache}
+				handleSetCache={handleSetCache}
+			/>
 		</div>
 	)
 }
@@ -298,17 +301,6 @@ const Toast = ({ toast, handleRemoveToast }) => {
 				)
 			}, this)}
 		</div >
-	)
-}
-
-const FloatingMenu = ({ useMock, handleSetCache }) => {
-	return (
-		<div className="fixed right-0 bottom-0 mb-3 mr-3 z-40">
-			<div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-				<input defaultChecked={useMock} onClick={() => handleSetCache("useMock", !useMock)} type="checkbox" name="toggle" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
-				<label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
-			</div>
-		</div>
 	)
 }
 
@@ -351,7 +343,7 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 		LayoutArticle.push(
 			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2 pl-6 pr-6">
 				<div id="header" className="flex flex-col">
-					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end z-30" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : DefaultImage})` }}>
+					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : DefaultImage})` }}>
 						<ActionButton
 							type="share"
 							articleData={el}
@@ -404,6 +396,28 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 			</InfiniteScroll>}
 			{useMock && LayoutArticle}
 
+		</div>
+	)
+}
+
+const SideMenu = ({ cache, handleSetCache }) => {
+	return (
+		<div>
+			{cache.isDisplayMenu && <div className="h-screen fixed bg-black shadow-lg w-80 top-0 z-40">
+				<ul>
+					<li className={`border-b border-gray-200 p-4 ${cache.selectedMenu === "home" ? "bg-green-500 text-black" : "text-gray-200 "}`} onClick={() => handleSetCache("selectedMenu", "home")}>Home</li>
+					<li className={`border-b border-gray-200 p-4 ${cache.selectedMenu === "saved-article" ? "bg-green-500 text-black" : "text-gray-200 "}`} onClick={() => handleSetCache("selectedMenu", "saved-article")}>Saved Article</li>
+					<li className={`border-b border-gray-200 p-4 text-gray-200`} onClick={() => handleSetCache("useMock", !cache.useMock)}>Use Mock
+						<div className="mb-3 mr-3 float-right">
+							<div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+								<input checked={cache.useMock} type="checkbox" name="toggle" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" readOnly={true} />
+								<label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>}
+			{cache.isDisplayMenu && <div className="fixed bg-black bg-opacity-70 h-screen w-screen top-0" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}></div>}
 		</div>
 	)
 }
@@ -564,8 +578,12 @@ ActionButton.propTypes = {
 	handleArticleSave: PropTypes.func
 }
 
-FloatingMenu.propTypes = {
-	useMock: PropTypes.bool,
+SideMenu.propTypes = {
+	cache: PropTypes.shape({
+		useMock: PropTypes.bool,
+		isDisplayMenu: PropTypes.bool,
+		selectedMenu: PropTypes.string
+	}),
 	handleSetCache: PropTypes.func.isRequired
 }
 
