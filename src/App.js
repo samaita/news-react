@@ -45,10 +45,11 @@ function Home() {
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
-		[articleList, setArticleList] = useState([]),
 		[topCategory] = useState({
 			name: "Space", slug: "space", title: "Space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
+		[articleList, setArticleList] = useState([]),
+		[articleSaved, setArticleSaved] = useState({}),
 		[topArticleList, setTopArticleList] = useState([]),
 		[categories] = useState([
 			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
@@ -191,6 +192,21 @@ function Home() {
 			currentToast.splice(mark, 1)
 			setToast(currentToast)
 		},
+		handleArticleSave = (saveData) => {
+			let newArticleList = []
+			let newArticleSaved = articleSaved
+
+			articleList.map(function (el) {
+				if (el.url === saveData.url) {
+					el.saved = !newArticleSaved[saveData.url]
+				}
+				newArticleList.push(el);
+			})
+			setArticleList(newArticleList)
+
+			newArticleSaved[saveData.url] = !newArticleSaved[saveData.url]
+			setArticleSaved(newArticleSaved)
+		},
 		handleTimeFormat = (unix) => {
 			let t = new Date(unix);
 			let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -230,10 +246,12 @@ function Home() {
 			<ArticleView
 				useMock={cache.useMock}
 				articleList={articleList}
+				articleSaved={articleSaved}
 				selectedCategory={selectedCategory}
 				maxCharDescription={config.maxCharDescription}
 				handleGetArticle={handleGetArticle}
-				handleTimeFormat={handleTimeFormat} />
+				handleTimeFormat={handleTimeFormat}
+				handleArticleSave={handleArticleSave} />
 			<FloatingMenu
 				useMock={cache.useMock}
 				handleSetCache={handleSetCache} />
@@ -272,7 +290,7 @@ const Toast = ({ toast, handleRemoveToast }) => {
 
 const FloatingMenu = ({ useMock, handleSetCache }) => {
 	return (
-		<div className="fixed right-0 bottom-0 mb-3 mr-3">
+		<div className="fixed right-0 bottom-0 mb-3 mr-3 z-40">
 			<div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
 				<input defaultChecked={useMock} onClick={() => handleSetCache("useMock", !useMock)} type="checkbox" name="toggle" className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
 				<label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer text-center"></label>
@@ -302,7 +320,7 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 }
 
 const Loader = (
-	<div className="flex h-screen w-screen fixed top-0 bg-black bg-opacity-70">
+	<div className="flex h-screen w-screen fixed top-0 bg-black bg-opacity-70 z-50">
 		<div className="m-auto">
 			<div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32">
 			</div>
@@ -310,7 +328,7 @@ const Loader = (
 	</div>
 )
 
-const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
+const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleSave }) => {
 	let LayoutArticle = []
 
 	articleList.map(function (el, index) {
@@ -319,16 +337,20 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 		LayoutArticle.push(
 			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2 pl-6 pr-6">
 				<div id="header" className="flex flex-col">
-					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}>
+					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end z-30" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}>
 						<ActionButton
 							type="share"
-							shareData={el}
+							articleData={el}
 							viewBox="-7 -7 40 40"
 							data="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
 						/>
 						<ActionButton
+							type="save"
+							articleData={el}
 							viewBox="-7 -7 40 40"
 							data="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+							selected={articleSaved[el.url]}
+							handleArticleSave={handleArticleSave}
 						/>
 					</div>
 					<div id="body" className="flex flex-col w-full h-full p-3">
@@ -372,12 +394,13 @@ const ArticleView = ({ useMock, articleList, selectedCategory, maxCharDescriptio
 	)
 }
 
-const ActionButton = ({ type, shareData, selected, viewBox, data }) => {
+const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticleSave }) => {
 	let fillValue = selected ? "#10B981" : "none"
 	let strokeValue = selected ? "#10B981" : "currentColor"
 	let useShare = type === "share" ? true : false
+	let useSave = type === "save" ? true : false
 
-	let defaultButton = <button className="w-14 h-14">
+	let defaultButton = <button className="w-14 h-14" onClick={() => useSave && handleArticleSave(articleData)}>
 		<span className="block bg-black text-gray-200 block rounded-full">
 			<svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox={viewBox} stroke={strokeValue}>
 				<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.5" d={data} />
@@ -389,9 +412,9 @@ const ActionButton = ({ type, shareData, selected, viewBox, data }) => {
 		<div className="-mb-9 mr-2">
 			{useShare && <RWebShare
 				data={{
-					text: shareData.title,
-					url: shareData.url,
-					title: shareData.title,
+					text: articleData.title,
+					url: articleData.url,
+					title: articleData.title,
 				}}>
 				{defaultButton}
 			</RWebShare>
@@ -475,7 +498,8 @@ ArticleView.propTypes = {
 		}
 	),
 	handleGetArticle: PropTypes.func.isRequired,
-	handleTimeFormat: PropTypes.func.isRequired
+	handleTimeFormat: PropTypes.func.isRequired,
+	handleArticleSave: PropTypes.func.isRequired
 }
 
 
@@ -490,7 +514,8 @@ TrendingView.propTypes = {
 					name: PropTypes.string
 				}
 			),
-			publishedAt: PropTypes.string
+			publishedAt: PropTypes.string,
+			saved: PropTypes.bool
 		}
 	)).isRequired,
 	selectedCategory: PropTypes.shape(
@@ -504,6 +529,26 @@ TrendingView.propTypes = {
 	handleTimeFormat: PropTypes.func.isRequired
 }
 
+ActionButton.propTypes = {
+	type: PropTypes.string,
+	articleList: PropTypes.shape(
+		{
+			title: PropTypes.string,
+			urlToImage: PropTypes.string,
+			source: PropTypes.shape(
+				{
+					name: PropTypes.string
+				}
+			),
+			publishedAt: PropTypes.string,
+			saved: PropTypes.bool
+		}
+	),
+	selected: PropTypes.bool,
+	viewBox: PropTypes.string,
+	data: PropTypes.string,
+	handleArticleSave: PropTypes.func.isRequired
+}
 
 FloatingMenu.propTypes = {
 	useMock: PropTypes.bool,
