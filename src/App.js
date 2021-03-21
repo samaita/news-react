@@ -1,22 +1,22 @@
 
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import PropTypes from 'prop-types'
 
-import './App.css';
-import DataMockEnergy from './mock/sample.energy.json';
-import DataMockSpace from './mock/sample.space.json';
-import DataMockCybersecurity from './mock/sample.cybersecurity.json';
-import DataMockAI from './mock/sample.ai.json';
-import DataMockIoT from './mock/sample.iot.json';
-import DataMockHealth from './mock/sample.health.json';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { RWebShare } from 'react-web-share';
+import './App.css'
+import DataMockEnergy from './mock/sample.energy.json'
+import DataMockSpace from './mock/sample.space.json'
+import DataMockCybersecurity from './mock/sample.cybersecurity.json'
+import DataMockAI from './mock/sample.ai.json'
+import DataMockIoT from './mock/sample.iot.json'
+import DataMockHealth from './mock/sample.health.json'
+import InfiniteScroll from 'react-infinite-scroll-component'
+import { RWebShare } from 'react-web-share'
 
 function App() {
 	return (
 		<Home />
-	);
+	)
 }
 
 function Home() {
@@ -31,7 +31,8 @@ function Home() {
 			sortByDate: "publishedAt",
 			sortByPopularity: "popularity",
 			language: "en",
-			maxCharDescription: 150
+			maxCharDescription: 150,
+			intervalDay: 14
 		}),
 		[cache, setCache] = useState({
 			useMock: true,
@@ -46,7 +47,7 @@ function Home() {
 			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
 		[topCategory] = useState({
-			name: "Space", slug: "space", title: "Space", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
+			name: "Popular", slug: "popular", title: "Popular", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker"
 		}),
 		[articleList, setArticleList] = useState([]),
 		[articleSaved, setArticleSaved] = useState({}),
@@ -136,6 +137,8 @@ function Home() {
 				return
 			}
 
+			let paramFrom = handleGetPastDate(config.intervalDay)
+
 			axios.get(config.newsURLEverything, {
 				headers: {
 					"X-API-KEY": config.newsAPIAuthKey
@@ -145,7 +148,8 @@ function Home() {
 					page: 1,
 					pageSize: 1,
 					sortBy: config.sortByPopularity,
-					language: config.language
+					language: config.language,
+					from: paramFrom
 				}
 			}).then(res => {
 				setTopArticleList(res.data.articles)
@@ -156,7 +160,7 @@ function Home() {
 			})
 		},
 		handleSetCache = (e, v) => {
-			let newCache = cache;
+			let newCache = cache
 			newCache[e] = v
 			setCache(newCache)
 		},
@@ -200,7 +204,7 @@ function Home() {
 				if (el.url === saveData.url) {
 					el.saved = !newArticleSaved[saveData.url]
 				}
-				newArticleList.push(el);
+				return newArticleList.push(el)
 			})
 			setArticleList(newArticleList)
 
@@ -208,15 +212,24 @@ function Home() {
 			setArticleSaved(newArticleSaved)
 		},
 		handleTimeFormat = (unix) => {
-			let t = new Date(unix);
-			let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-			let year = t.getFullYear();
-			let month = months[t.getMonth()];
-			let date = t.getDate();
-			let hour = t.getHours() < 10 ? "0" + t.getHours() : t.getHours();
-			let min = t.getMinutes() < 10 ? "0" + t.getMinutes() : t.getMinutes();
-			let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
-			return time;
+			let t = new Date(unix)
+			let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+			let year = t.getFullYear()
+			let month = months[t.getMonth()]
+			let date = t.getDate()
+			let hour = t.getHours() < 10 ? "0" + t.getHours() : t.getHours()
+			let min = t.getMinutes() < 10 ? "0" + t.getMinutes() : t.getMinutes()
+			let time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min
+			return time
+		},
+		handleGetPastDate = (day) => {
+			let ot = Date.now()
+			let t = new Date(ot - (day * 24 * 60 * 60 * 1000))
+			let year = t.getFullYear()
+			let month = (t.getMonth() + 1) < 10 ? "0" + (t.getMonth() + 1) : t.getMonth()
+			let date = t.getDate()
+			let time = year + '-' + month + '-' + date
+			return time
 		}
 
 	useEffect(() => {
@@ -304,8 +317,8 @@ const CategoryMenu = ({ categories, selectedCategory, handleSelectCategory }) =>
 		<div className="overflow-hidden mb-4" >
 			<ul className="flex flex-row overflow-x-scroll hide-scroll-bar">
 				{categories.map(function (category, index) {
-					let isFirst = index === 0;
-					let isSelected = category.slug === selectedCategory.slug || (isFirst && selectedCategory.slug === "init");
+					let isFirst = index === 0
+					let isSelected = category.slug === selectedCategory.slug || (isFirst && selectedCategory.slug === "init")
 					return (
 						<li key={category.slug} className={`${isFirst ? "ml-5" : ""}`}>
 							<a className={`border pl-4 pt-2 pb-2 pr-4 mr-1 rounded-3xl whitespace-nowrap border-gray-500 block ${isSelected ? "bg-gray-200 text-black" : "text-gray-200"}`} href={"#" + category.slug} onClick={() => handleSelectCategory(category)}>
@@ -332,12 +345,13 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 	let LayoutArticle = []
 
 	articleList.map(function (el, index) {
-		let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
+		let hasDefaultImage = el.urlToImage ? true : false
+		let DefaultImage = "https://images.unsplash.com/photo-1606639386377-aa1a3ed390ea?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
 
 		LayoutArticle.push(
 			<div key={index} className="max-w-full bg-black rounded-2xl tracking-wide shadow mt-4 mb-2 pl-6 pr-6">
 				<div id="header" className="flex flex-col">
-					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end z-30" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : el.urlToImage})` }}>
+					<div className="bg-gray-100 w-full h-48 rounded-md max-h-96 bg-cover flex items-end justify-end z-30" style={{ backgroundImage: `url(${hasDefaultImage ? el.urlToImage : DefaultImage})` }}>
 						<ActionButton
 							type="share"
 							articleData={el}
@@ -547,7 +561,7 @@ ActionButton.propTypes = {
 	selected: PropTypes.bool,
 	viewBox: PropTypes.string,
 	data: PropTypes.string,
-	handleArticleSave: PropTypes.func.isRequired
+	handleArticleSave: PropTypes.func
 }
 
 FloatingMenu.propTypes = {
@@ -570,4 +584,4 @@ Loading.propTypes = {
 	show: PropTypes.bool
 }
 
-export default App;
+export default App
