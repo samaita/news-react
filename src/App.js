@@ -39,13 +39,13 @@ function Home() {
 			idToast: 0,
 			pageNumber: 1,
 			hasNext: false,
-			isLoading: false,
 			nextPageNumber: 2,
-			isArticleLoaded: false,
+			isInitArticleLoaded: false,
 			isTopArticleLoaded: false,
 			selectedMenu: "home",
 			isDisplayMenu: true
 		}),
+		[isLoading, setIsLoading] = useState(false),
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
@@ -77,70 +77,68 @@ function Home() {
 		[toast, setToast] = useState([])
 
 	const
-		handleSelectCategory = e => {
-			if (selectedCategory.slug === e.slug && cache.isArticleLoaded) {
+		handleSelectCategory = category => {
+			if (selectedCategory.slug === category.slug && cache.isInitArticleLoaded) {
 				return
 			}
 
-			setSelectedCategory(e)
-
-			handleSetCache("pageNumber", 1)
-			handleSetCache("nextPageNumber", 1)
+			setSelectedCategory(category)
 
 			if (cache.useMock) {
-				setArticleList(mockArticle[e.slug])
+				setArticleList(mockArticle[category.slug])
 			} else {
-				handleGetArticle(e)
+				setIsLoading(true)
+				handleGetArticle(category, 1)
 			}
 
 			if (!cache.useMock && !cache.isTopArticleLoaded) {
 				handleGetTopArticle()
 				handleSetCache("isTopArticleLoaded", true)
 			}
-			if (!cache.isArticleLoaded) {
-				handleSetCache("isArticleLoaded", !cache.isArticleLoaded)
+
+			if (!cache.isInitArticleLoaded) {
+				handleSetCache("isInitArticleLoaded", !cache.isInitArticleLoaded)
 			}
 		},
-		handleGetArticle = (e) => {
-			if (cache.isLoading || cache.useMock) {
+		handleGetArticle = (category, pageNumber) => {
+			if (cache.useMock) {
 				return
 			}
-
-			if (!e) {
-				e = selectedCategory
+			if (!category) {
+				category = selectedCategory
 			}
-
-			handleSetCache("isLoading", !cache.isLoading)
+			if (!pageNumber) {
+				pageNumber = cache.pageNumber
+			}
 
 			axios.get(config.newsURLEverything, {
 				headers: {
 					"X-API-KEY": config.newsAPIAuthKey
 				},
 				params: {
-					qInTitle: e.keyword,
-					page: cache.nextPageNumber,
+					qInTitle: category.keyword,
+					page: pageNumber,
 					pageSize: config.pageSize,
 					sortBy: config.sortByDate,
 					language: config.language
 				}
 			}).then(res => {
-				handleSetCache("isLoading", !cache.isLoading)
+				setIsLoading(false)
 
-				if (cache.nextPageNumber > 1) {
+				if (pageNumber > 1) {
 					setArticleList([...articleList, ...res.data.articles])
 				} else {
 					setArticleList(res.data.articles)
 				}
 
-				if (res.data.totalResults > config.pageSize * cache.pageNumber) {
+				if (res.data.totalResults > config.pageSize * pageNumber) {
 					handleSetCache("hasNext", true)
+					handleSetCache("pageNumber", pageNumber + 1)
 				} else {
 					handleSetCache("hasNext", false)
 				}
-				handleSetCache("pageNumber", cache.nextPageNumber)
-				handleSetCache("nextPageNumber", cache.nextPageNumber + 1)
 			}).catch(err => {
-				handleSetCache("isLoading", !cache.isLoading)
+				setIsLoading(false)
 
 				if (err.response && err.response.status !== 200) {
 					handlePushToast("error", err.response.message)
@@ -287,7 +285,7 @@ function Home() {
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
 			<Loading
-				show={cache.isLoading} />
+				isLoading={isLoading} />
 			<SideMenu
 				cache={cache}
 				handleSetCache={handleSetCache}
@@ -296,10 +294,10 @@ function Home() {
 	)
 }
 
-const Loading = ({ show }) => {
+const Loading = ({ isLoading }) => {
 	return (
 		<div>
-			{show && Loader}
+			{isLoading && Loader}
 		</div>
 	)
 }
