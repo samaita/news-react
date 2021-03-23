@@ -35,12 +35,11 @@ function Home() {
 			intervalDay: 14
 		}),
 		[cache, setCache] = useState({
-			useMock: true,
+			useMock: false,
 			idToast: 0,
 			isInitArticleLoaded: false,
-			isTopArticleLoaded: false,
 			selectedMenu: "home",
-			isDisplayMenu: true
+			isDisplayMenu: false
 		}),
 		[page, setPage] = useState({
 			number: 1,
@@ -50,11 +49,16 @@ function Home() {
 		[selectedCategory, setSelectedCategory] = useState({
 			name: "All", slug: "all", title: "Latest", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
+		[articleBookmarkedCategory] = useState({
+			name: "All", slug: "all", title: "Bookmark"
+		}),
 		[topCategory] = useState({
 			name: "Popular", slug: "popular", title: "Popular", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker"
 		}),
 		[articleList, setArticleList] = useState([]),
-		[articleSaved, setArticleSaved] = useState({}),
+		[articleBookmarkedList, setArticleBookmarkedList] = useState([]),
+		[articleBookmarked, setArticleBookmarked] = useState({}),
+		[topArticleLoaded, setTopArticleLoaded] = useState(false),
 		[topArticleList, setTopArticleList] = useState([]),
 		[categories] = useState([
 			{ name: "All", slug: "all", title: "Latest", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
@@ -92,9 +96,9 @@ function Home() {
 				handleGetArticle(category, 1)
 			}
 
-			if (!cache.useMock && !cache.isTopArticleLoaded) {
+			if (!cache.useMock && !topArticleLoaded) {
 				handleGetTopArticle()
-				handleSetCache("isTopArticleLoaded", true)
+				setTopArticleLoaded(true)
 			}
 
 			if (!cache.isInitArticleLoaded) {
@@ -216,20 +220,38 @@ function Home() {
 			currentToast.splice(mark, 1)
 			setToast(currentToast)
 		},
-		handleArticleSave = (saveData) => {
+		handleArticleBookmark = (bookmarkData) => {
 			let newArticleList = []
-			let newArticleSaved = { ...articleSaved }
+			let newArticleBookmarked = { ...articleBookmarked }
+			let newArticleBookmarkedList = [...articleBookmarkedList]
 
 			articleList.map(function (el) {
-				if (el.url === saveData.url) {
-					el.saved = !newArticleSaved[saveData.url]
+				if (el.url === bookmarkData.url) {
+					el.bookmarked = !newArticleBookmarked[bookmarkData.url]
 				}
 				return newArticleList.push(el)
 			})
 			setArticleList(newArticleList)
 
-			newArticleSaved[saveData.url] = !newArticleSaved[saveData.url]
-			setArticleSaved(newArticleSaved)
+			if (!newArticleBookmarked[bookmarkData.url]) {
+				setArticleBookmarkedList([...newArticleBookmarkedList, bookmarkData])
+			} else {
+				let updateNewArticleBookmarkedList = []
+				newArticleBookmarkedList.map(function (el) {
+					if (el.url !== bookmarkData.url) {
+						return updateNewArticleBookmarkedList.push(el)
+					}
+					return updateNewArticleBookmarkedList
+				})
+				setArticleBookmarkedList(updateNewArticleBookmarkedList)
+
+			}
+
+			newArticleBookmarked[bookmarkData.url] = !newArticleBookmarked[bookmarkData.url]
+			setArticleBookmarked(newArticleBookmarked)
+		},
+		handleGetArticleBookmarked = () => {
+			return
 		},
 		handleTimeFormat = (unix) => {
 			let t = new Date(unix)
@@ -256,9 +278,6 @@ function Home() {
 		if (articleList && articleList.length <= 0) {
 			handleSelectCategory(selectedCategory)
 		}
-		if (topArticleList && topArticleList.length <= 0) {
-			handleGetTopArticle()
-		}
 	})
 
 	return (
@@ -281,12 +300,22 @@ function Home() {
 			<ArticleView
 				useMock={cache.useMock}
 				articleList={articleList}
-				articleSaved={articleSaved}
+				articleBookmarked={articleBookmarked}
 				selectedCategory={selectedCategory}
 				maxCharDescription={config.maxCharDescription}
+				hasMore={page.hasNext}
 				handleGetArticle={handleGetArticle}
 				handleTimeFormat={handleTimeFormat}
-				handleArticleSave={handleArticleSave} />
+				handleArticleBookmark={handleArticleBookmark} />
+			<ArticleBookmarkedView
+				useMock={cache.useMock}
+				articleList={articleBookmarkedList}
+				articleBookmarked={articleBookmarked}
+				selectedCategory={articleBookmarkedCategory}
+				maxCharDescription={config.maxCharDescription}
+				handleGetArticle={handleGetArticleBookmarked}
+				handleTimeFormat={handleTimeFormat}
+				handleArticleBookmark={handleArticleBookmark} />
 			<Toast
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
@@ -353,8 +382,27 @@ const Loader = (
 	</div>
 )
 
-const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleSave }) => {
+const ArticleBookmarkedView = ({ useMock, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
+	return (
+		<div>
+			<ArticleView
+				useMock={useMock}
+				articleList={articleList}
+				articleBookmarked={articleBookmarked}
+				selectedCategory={selectedCategory}
+				maxCharDescription={maxCharDescription}
+				handleGetArticle={handleGetArticle}
+				handleTimeFormat={handleTimeFormat}
+				handleArticleBookmark={handleArticleBookmark}
+				hasMore={hasMore} />
+		</div>
+	)
+}
+
+const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
 	let LayoutArticle = []
+
+	console.log(articleList)
 
 	articleList.map(function (el, index) {
 		let hasDefaultImage = el.urlToImage ? true : false
@@ -371,12 +419,12 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 							data="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
 						/>
 						<ActionButton
-							type="save"
+							type="bookmark"
 							articleData={el}
 							viewBox="-7 -7 40 40"
 							data="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-							selected={articleSaved[el.url]}
-							handleArticleSave={handleArticleSave}
+							selected={articleBookmarked[el.url]}
+							handleArticleBookmark={handleArticleBookmark}
 						/>
 					</div>
 					<div id="body" className="flex flex-col w-full h-full p-3">
@@ -398,7 +446,7 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 				{selectedCategory.title ? selectedCategory.title : selectedCategory.name}
 			</h1>
 
-			{!useMock && <InfiniteScroll
+			{!useMock && articleList.length > 0 && < InfiniteScroll
 				dataLength={articleList.length}
 				next={handleGetArticle}
 				hasMore={true}
@@ -414,9 +462,9 @@ const ArticleView = ({ useMock, articleList, articleSaved, selectedCategory, max
 				}>
 				{LayoutArticle}
 			</InfiniteScroll>}
-			{useMock && LayoutArticle}
+			{ useMock && LayoutArticle}
 
-		</div>
+		</div >
 	)
 }
 
@@ -459,13 +507,13 @@ const SideMenu = ({ cache, handleSetCache }) => {
 	)
 }
 
-const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticleSave }) => {
+const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticleBookmark }) => {
 	let fillValue = selected ? "#10B981" : "none"
 	let strokeValue = selected ? "#10B981" : "currentColor"
 	let useShare = type === "share" ? true : false
-	let useSave = type === "save" ? true : false
+	let useBookmark = type === "bookmark" ? true : false
 
-	let defaultButton = <button className="w-14 h-14" onClick={() => useSave && handleArticleSave(articleData)}>
+	let defaultButton = <button className="w-14 h-14" onClick={() => useBookmark && handleArticleBookmark(articleData)}>
 		<span className="block bg-black text-gray-200 block rounded-full">
 			<svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox={viewBox} stroke={strokeValue}>
 				<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.5" d={data} />
@@ -474,7 +522,7 @@ const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticl
 	</button>
 
 	return (
-		<div className="-mb-9 mr-2">
+		<div className="-mb-9 mr-2 z-20">
 			{useShare && <RWebShare
 				data={{
 					text: articleData.title,
@@ -564,7 +612,7 @@ ArticleView.propTypes = {
 	),
 	handleGetArticle: PropTypes.func.isRequired,
 	handleTimeFormat: PropTypes.func.isRequired,
-	handleArticleSave: PropTypes.func.isRequired
+	handleArticleBookmark: PropTypes.func.isRequired
 }
 
 
@@ -580,7 +628,7 @@ TrendingView.propTypes = {
 				}
 			),
 			publishedAt: PropTypes.string,
-			saved: PropTypes.bool
+			bookmarked: PropTypes.bool
 		}
 	)).isRequired,
 	selectedCategory: PropTypes.shape(
@@ -606,13 +654,13 @@ ActionButton.propTypes = {
 				}
 			),
 			publishedAt: PropTypes.string,
-			saved: PropTypes.bool
+			bookmarked: PropTypes.bool
 		}
 	),
 	selected: PropTypes.bool,
 	viewBox: PropTypes.string,
 	data: PropTypes.string,
-	handleArticleSave: PropTypes.func
+	handleArticleBookmark: PropTypes.func
 }
 
 SideMenu.propTypes = {
