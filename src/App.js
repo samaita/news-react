@@ -37,13 +37,14 @@ function Home() {
 		[cache, setCache] = useState({
 			useMock: true,
 			idToast: 0,
-			pageNumber: 1,
-			hasNext: false,
-			nextPageNumber: 2,
 			isInitArticleLoaded: false,
 			isTopArticleLoaded: false,
 			selectedMenu: "home",
 			isDisplayMenu: true
+		}),
+		[page, setPage] = useState({
+			number: 1,
+			hasNext: false,
 		}),
 		[isLoading, setIsLoading] = useState(false),
 		[selectedCategory, setSelectedCategory] = useState({
@@ -108,7 +109,7 @@ function Home() {
 				category = selectedCategory
 			}
 			if (!pageNumber) {
-				pageNumber = cache.pageNumber
+				pageNumber = page.Number
 			}
 
 			axios.get(config.newsURLEverything, {
@@ -132,10 +133,9 @@ function Home() {
 				}
 
 				if (res.data.totalResults > config.pageSize * pageNumber) {
-					handleSetCache("hasNext", true)
-					handleSetCache("pageNumber", pageNumber + 1)
+					handleSetPage(true, pageNumber + 1)
 				} else {
-					handleSetCache("hasNext", false)
+					handleSetPage(false, pageNumber)
 				}
 			}).catch(err => {
 				setIsLoading(false)
@@ -144,6 +144,12 @@ function Home() {
 					handlePushToast("error", err.response.message)
 				}
 			})
+		},
+		handleSetPage = (hasNext, pageNumber) => {
+			let newPage = { ...page }
+			newPage.hasNext = hasNext
+			newPage.Number = pageNumber
+			setPage(newPage)
 		},
 		handleGetTopArticle = () => {
 			if (cache.useMock) {
