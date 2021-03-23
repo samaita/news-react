@@ -41,33 +41,44 @@ function Home() {
 			hasNext: false,
 			isLoading: false,
 			nextPageNumber: 2,
+			isArticleLoaded: false,
 			isTopArticleLoaded: false,
 			selectedMenu: "home",
 			isDisplayMenu: true
 		}),
 		[selectedCategory, setSelectedCategory] = useState({
-			name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
+			name: "All", slug: "all", title: "Latest", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security"
 		}),
 		[topCategory] = useState({
-			name: "Popular", slug: "popular", title: "Popular", data: DataMockSpace.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker"
+			name: "Popular", slug: "popular", title: "Popular", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker"
 		}),
 		[articleList, setArticleList] = useState([]),
 		[articleSaved, setArticleSaved] = useState({}),
 		[topArticleList, setTopArticleList] = useState([]),
 		[categories] = useState([
-			{ name: "All", slug: "all", title: "Latest", data: DataMockEnergy.articles, keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
-			{ name: "Space", slug: "space", data: DataMockSpace.articles, keyword: "nasa OR spacex OR perseverance OR mars OR lapan" },
-			{ name: "Energy", slug: "energy", data: DataMockEnergy.articles, keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
-			{ name: "Health", slug: "health", data: DataMockHealth.articles, keyword: "health AND -biden" },
-			{ name: "IoT", slug: "iot", data: DataMockIoT.articles, keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
-			{ name: "Artificial Intelligence", slug: "artificial-intelligence", data: DataMockAI.articles, keyword: "artificial intelligence OR neural network OR auto pilot" },
-			{ name: "Cybersecurity", slug: "cybersecurity", data: DataMockCybersecurity.articles, keyword: "hacker OR cyber security" },
+			{ name: "All", slug: "all", title: "Latest", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker OR cyber security" },
+			{ name: "Space", slug: "space", keyword: "nasa OR spacex OR perseverance OR mars OR lapan" },
+			{ name: "Energy", slug: "energy", keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
+			{ name: "Health", slug: "health", keyword: "health AND -biden" },
+			{ name: "IoT", slug: "iot", keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
+			{ name: "Artificial Intelligence", slug: "artificial_intelligence", keyword: "artificial intelligence OR neural network OR auto pilot" },
+			{ name: "Cybersecurity", slug: "cybersecurity", keyword: "hacker OR cyber security" },
 		]),
+		[mockArticle] = useState({
+			all: DataMockEnergy.articles,
+			space: DataMockSpace.articles,
+			energy: DataMockEnergy.articles,
+			health: DataMockEnergy.articles,
+			iot: DataMockIoT.articles,
+			artificial_inteligence: DataMockAI.articles,
+			cybersecurity: DataMockCybersecurity.articles,
+			popular: DataMockSpace.articles,
+		}),
 		[toast, setToast] = useState([])
 
 	const
 		handleSelectCategory = e => {
-			if (selectedCategory.slug === e.slug) {
+			if (selectedCategory.slug === e.slug && cache.isArticleLoaded) {
 				return
 			}
 
@@ -77,7 +88,7 @@ function Home() {
 			handleSetCache("nextPageNumber", 1)
 
 			if (cache.useMock) {
-				setArticleList(e.data)
+				setArticleList(mockArticle[e.slug])
 			} else {
 				handleGetArticle(e)
 			}
@@ -85,6 +96,9 @@ function Home() {
 			if (!cache.useMock && !cache.isTopArticleLoaded) {
 				handleGetTopArticle()
 				handleSetCache("isTopArticleLoaded", true)
+			}
+			if (!cache.isArticleLoaded) {
+				handleSetCache("isArticleLoaded", !cache.isArticleLoaded)
 			}
 		},
 		handleGetArticle = (e) => {
@@ -135,7 +149,7 @@ function Home() {
 		},
 		handleGetTopArticle = () => {
 			if (cache.useMock) {
-				setTopArticleList(topCategory.data)
+				setTopArticleList(mockArticle["popular"])
 				return
 			}
 
@@ -236,9 +250,7 @@ function Home() {
 
 	useEffect(() => {
 		if (articleList && articleList.length <= 0) {
-			let initCategory = { ...selectedCategory }
-			initCategory.slug = "init"
-			handleSelectCategory(initCategory)
+			handleSelectCategory(selectedCategory)
 		}
 		if (topArticleList && topArticleList.length <= 0) {
 			handleGetTopArticle()
