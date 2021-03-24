@@ -56,8 +56,8 @@ function Home() {
 			name: "Popular", slug: "popular", title: "Popular", keyword: "space OR nasa OR spacex OR perseverance OR mars OR lapan OR solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy OR arduino OR raspberry pi OR raspi OR IoT OR internet of things OR artificial intelligence OR neural network OR auto pilot OR hacker"
 		}),
 		[articleList, setArticleList] = useState([]),
-		[articleBookmarkedList, setArticleBookmarkedList] = useState([]),
-		[articleBookmarked, setArticleBookmarked] = useState({}),
+		[articleBookmarkedList, setArticleBookmarkedList] = useLocalStorage("articleBookmarkedList", []),
+		[articleBookmarked, setArticleBookmarked] = useLocalStorage("articleBookmarked", {}),
 		[topArticleLoaded, setTopArticleLoaded] = useState(false),
 		[topArticleList, setTopArticleList] = useState([]),
 		[categories] = useState([
@@ -280,6 +280,31 @@ function Home() {
 		}
 	})
 
+	function useLocalStorage(key, initialValue) {
+		const [storedValue, setStoredValue] = useState(() => {
+			try {
+				const item = window.localStorage.getItem(key);
+				return item ? JSON.parse(item) : initialValue;
+			} catch (error) {
+				console.log(error);
+				return initialValue;
+			}
+		});
+
+		const setValue = value => {
+			try {
+				const valueToStore =
+					value instanceof Function ? value(storedValue) : value;
+				setStoredValue(valueToStore);
+				window.localStorage.setItem(key, JSON.stringify(valueToStore));
+			} catch (error) {
+				console.log(error);
+			}
+		};
+
+		return [storedValue, setValue];
+	}
+
 	return (
 		<div className="App bg-black">
 			<Header
@@ -482,7 +507,7 @@ const Header = ({ cache, handleSetCache }) => {
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M4 6h16M4 12h16M4 18h16" />
 				</svg>
 			</div>
-			<div className="float-left text-white px-2 py-5" onClick={() => handleSetCache("selectedMenu", "home")}>LOGO</div>
+			<div className="float-left text-white py-4 font-bold text-green-500 text-2xl" onClick={() => handleSetCache("selectedMenu", "home")}>LAMPU NEON</div>
 			<div className="h-16 w-16 text-gray-200 float-right" onClick={() => handleSetCache("selectedMenu", toggleBookmark)}>
 				<svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox="-12 -12 48 48" stroke={strokeValue}>
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
