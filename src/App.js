@@ -35,7 +35,7 @@ function Home() {
 			intervalDay: 14
 		}),
 		[cache, setCache] = useState({
-			useMock: false,
+			useMock: true,
 			idToast: 0,
 			isInitArticleLoaded: false,
 			selectedMenu: "home",
@@ -66,16 +66,16 @@ function Home() {
 			{ name: "Energy", slug: "energy", keyword: "solar panel OR wind turbine OR geothermal OR nuclear OR renewable OR energy" },
 			{ name: "Health", slug: "health", keyword: "health AND -biden" },
 			{ name: "IoT", slug: "iot", keyword: "arduino OR raspberry pi OR raspi OR IoT OR internet of things" },
-			{ name: "Artificial Intelligence", slug: "artificial_intelligence", keyword: "artificial intelligence OR neural network OR auto pilot" },
+			{ name: "Artificial Intelligence", slug: "ai", keyword: "artificial intelligence OR neural network OR auto pilot" },
 			{ name: "Cybersecurity", slug: "cybersecurity", keyword: "hacker OR cyber security" },
 		]),
 		[mockArticle] = useState({
 			all: DataMockEnergy.articles,
 			space: DataMockSpace.articles,
 			energy: DataMockEnergy.articles,
-			health: DataMockEnergy.articles,
+			health: DataMockHealth.articles,
 			iot: DataMockIoT.articles,
-			artificial_inteligence: DataMockAI.articles,
+			ai: DataMockAI.articles,
 			cybersecurity: DataMockCybersecurity.articles,
 			popular: DataMockSpace.articles,
 		}),
@@ -286,36 +286,38 @@ function Home() {
 				cache={cache}
 				handleSetCache={handleSetCache}
 			/>
-			<TrendingView
-				useMock={cache.useMock}
-				articleList={topArticleList}
-				selectedCategory={selectedCategory}
-				maxCharDescription={config.maxCharDescription}
-				handleGetArticle={handleGetArticle}
-				handleTimeFormat={handleTimeFormat} />
-			<CategoryMenu
-				categories={categories}
-				selectedCategory={selectedCategory}
-				handleSelectCategory={handleSelectCategory} />
-			<ArticleView
-				useMock={cache.useMock}
-				articleList={articleList}
-				articleBookmarked={articleBookmarked}
-				selectedCategory={selectedCategory}
-				maxCharDescription={config.maxCharDescription}
-				hasMore={page.hasNext}
-				handleGetArticle={handleGetArticle}
-				handleTimeFormat={handleTimeFormat}
-				handleArticleBookmark={handleArticleBookmark} />
-			<ArticleBookmarkedView
-				useMock={cache.useMock}
+			{cache.selectedMenu === "home" && <div>
+				<TrendingView
+					useMock={cache.useMock}
+					articleList={topArticleList}
+					selectedCategory={selectedCategory}
+					maxCharDescription={config.maxCharDescription}
+					handleGetArticle={handleGetArticle}
+					handleTimeFormat={handleTimeFormat} />
+				<CategoryMenu
+					categories={categories}
+					selectedCategory={selectedCategory}
+					handleSelectCategory={handleSelectCategory} />
+				<ArticleView
+					useMock={cache.useMock}
+					articleList={articleList}
+					articleBookmarked={articleBookmarked}
+					selectedCategory={selectedCategory}
+					maxCharDescription={config.maxCharDescription}
+					hasMore={page.hasNext}
+					handleGetArticle={handleGetArticle}
+					handleTimeFormat={handleTimeFormat}
+					handleArticleBookmark={handleArticleBookmark} />
+			</div>}
+			{cache.selectedMenu === "bookmark" && <ArticleBookmarkedView
+				useMock={true}
 				articleList={articleBookmarkedList}
 				articleBookmarked={articleBookmarked}
 				selectedCategory={articleBookmarkedCategory}
 				maxCharDescription={config.maxCharDescription}
 				handleGetArticle={handleGetArticleBookmarked}
 				handleTimeFormat={handleTimeFormat}
-				handleArticleBookmark={handleArticleBookmark} />
+				handleArticleBookmark={handleArticleBookmark} />}
 			<Toast
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
@@ -384,7 +386,7 @@ const Loader = (
 
 const ArticleBookmarkedView = ({ useMock, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
 	return (
-		<div>
+		<div className="mt-14 pt-4 bg-black">
 			<ArticleView
 				useMock={useMock}
 				articleList={articleList}
@@ -432,7 +434,7 @@ const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory
 						<h1 id="title" className="mb-1 text-2xl leading-7 text-gray-100">{el.title}</h1>
 						<h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
 						<p className="text-white text-base font-light mt-1 mb-2">{el.description && el.description.length > maxCharDescription ? el.description.substring(0, maxCharDescription) + "..." : el.description}</p>
-						<a className="text-green-500 block w-full border rounded-md p-2 text-center border-green-500" href={el.url}>Read More</a>
+						<a className="text-green-500 block w-full border rounded-md p-2 text-center border-green-500" href={el.url}>Go To Website</a>
 					</div>
 				</div>
 			</div >)
@@ -469,16 +471,20 @@ const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory
 }
 
 const Header = ({ cache, handleSetCache }) => {
+	let fillValue = cache.selectedMenu === "bookmark" ? "#10B981" : "none"
+	let strokeValue = cache.selectedMenu === "bookmark" ? "#10B981" : "currentColor"
+	let toggleBookmark = cache.selectedMenu === "bookmark" ? "home" : "bookmark"
+
 	return (
-		<div className="w-screen top-0 fixed bg-black h-16 z-10 border-b border-white">
-			<div className="h-12 w-12 text-gray-200 float-left" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}>
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-8 -12 36 36" stroke="currentColor">
+		<div className="w-screen top-0 fixed bg-black h-16 z-30 border-b border-white">
+			<div className="h-16 w-16 text-gray-200 float-left" onClick={() => handleSetCache("isDisplayMenu", !cache.isDisplayMenu)}>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-12 -12 48 48" stroke="currentColor">
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M4 6h16M4 12h16M4 18h16" />
 				</svg>
 			</div>
-			<div className="float-left text-white px-2 py-5">LOGO</div>
-			<div className="h-12 w-12 text-gray-200 float-right mr-2">
-				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="-8 -8 32 32" stroke="currentColor">
+			<div className="float-left text-white px-2 py-5" onClick={() => handleSetCache("selectedMenu", "home")}>LOGO</div>
+			<div className="h-16 w-16 text-gray-200 float-right" onClick={() => handleSetCache("selectedMenu", toggleBookmark)}>
+				<svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox="-12 -12 48 48" stroke={strokeValue}>
 					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
 				</svg>
 			</div>
@@ -522,7 +528,7 @@ const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticl
 	</button>
 
 	return (
-		<div className="-mb-9 mr-2 z-20">
+		<div className="-mb-9 mr-2 z-10">
 			{useShare && <RWebShare
 				data={{
 					text: articleData.title,
