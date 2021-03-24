@@ -146,6 +146,8 @@ function Home() {
 
 				if (err.response && err.response.status !== 200) {
 					handlePushToast("error", err.response.message)
+				} else if (err.name === 'Error') {
+					handlePushToast("error", "There was an error, " + err)
 				}
 			})
 		},
@@ -367,11 +369,11 @@ const Loading = ({ isLoading }) => {
 const Toast = ({ toast, handleRemoveToast }) => {
 	return (
 		<div className="fixed left-0 p-2 w-full bottom-0" >
-			{toast && toast.map(function (data) {
+			{true && toast.map(function (data) {
 				return (
-					<div className="flex items-center bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
-						<div className="flex item-center text-white text-sm content-center">
-							<div className="w-11/12">{data.message}</div><div onClick={() => handleRemoveToast(data.id)} className="w-1/12 text-center">OK</div>
+					<div className="flex items-center mt-1 bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
+						<div className="flex item-center text-white text-sm content-center w-full">
+							<div className="w-11/12">{data.message}</div><div onClick={() => handleRemoveToast(data.id)} className="w-1/12 text-center float-right block">OK</div>
 						</div>
 					</div>
 				)
@@ -428,8 +430,6 @@ const ArticleBookmarkedView = ({ useMock, articleList, articleBookmarked, select
 
 const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
 	let LayoutArticle = []
-
-	console.log(articleList)
 
 	articleList.map(function (el, index) {
 		let hasDefaultImage = el.urlToImage ? true : false
