@@ -2,10 +2,10 @@ import PropTypes from 'prop-types'
 
 const Toast = ({ toast, handleRemoveToast }) => {
     return (
-        <div className="fixed left-0 p-2 w-full bottom-0" >
+        <div className="fixed left-0 p-2 w-full bottom-0 z-40" >
             {true && toast.map(function (data) {
                 return (
-                    <div className="flex items-center mt-1 bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md">
+                    <div className="flex items-center mt-1 bg-red-500 border-l-4 border-red-700 py-2 px-3 shadow-md z-40">
                         <div className="flex item-center text-white text-sm content-center w-full">
                             <div className="w-11/12">{data.message}</div><div onClick={() => handleRemoveToast(data.id)} className="w-1/12 text-center float-right block">OK</div>
                         </div>

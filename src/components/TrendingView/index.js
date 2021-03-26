@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-const TrendingView = ({ useMock, articleList, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
+const TrendingView = ({ useMock, articleList, selectedMenu, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
     let LayoutArticle = []
 
     articleList.map(function (el, index) {
@@ -29,8 +29,10 @@ const TrendingView = ({ useMock, articleList, selectedCategory, maxCharDescripti
     })
 
     return (
-        <div className="mt-16 block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
-            {LayoutArticle}
+        <div>
+            {selectedMenu === "home" && <div className="mt-16 block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
+                {LayoutArticle}
+            </div>}
         </div>
     )
 }
@@ -50,6 +52,7 @@ TrendingView.propTypes = {
             bookmarked: PropTypes.bool
         }
     )).isRequired,
+    selectedMenu: PropTypes.string,
     selectedCategory: PropTypes.shape(
         {
             name: PropTypes.string,
