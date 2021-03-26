@@ -1,17 +1,16 @@
 import PropTypes from 'prop-types'
 import { RWebShare } from 'react-web-share'
 
+const ActionButton = (props) => {
+    let fillValue = props.selected ? "#10B981" : "none"
+    let strokeValue = props.selected ? "#10B981" : "currentColor"
+    let useShare = props.type === "share" ? true : false
+    let useBookmark = props.type === "bookmark" ? true : false
 
-const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticleBookmark }) => {
-    let fillValue = selected ? "#10B981" : "none"
-    let strokeValue = selected ? "#10B981" : "currentColor"
-    let useShare = type === "share" ? true : false
-    let useBookmark = type === "bookmark" ? true : false
-
-    let defaultButton = <button className="w-14 h-14" onClick={() => useBookmark && handleArticleBookmark(articleData)}>
+    let defaultButton = <button className="w-14 h-14" onClick={() => useBookmark && props.handleArticleBookmark(props.articleData)}>
         <span className="block bg-black text-gray-200 block rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox={viewBox} stroke={strokeValue}>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.5" d={data} />
+            <svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox={props.viewBox} stroke={strokeValue}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.5" d={props.data} />
             </svg>
         </span>
     </button>
@@ -20,9 +19,9 @@ const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticl
         <div className="-mb-9 mr-2 z-10">
             {useShare && <RWebShare
                 data={{
-                    text: articleData.title,
-                    url: articleData.url,
-                    title: articleData.title,
+                    text: props.articleData.title,
+                    url: props.articleData.url,
+                    title: props.articleData.title,
                 }}>
                 {defaultButton}
             </RWebShare>
@@ -33,7 +32,7 @@ const ActionButton = ({ type, articleData, selected, viewBox, data, handleArticl
 }
 
 ActionButton.propTypes = {
-    type: PropTypes.string,
+    type: PropTypes.string.isRequired,
     articleList: PropTypes.shape(
         {
             title: PropTypes.string,
@@ -48,8 +47,8 @@ ActionButton.propTypes = {
         }
     ),
     selected: PropTypes.bool,
-    viewBox: PropTypes.string,
-    data: PropTypes.string,
+    viewBox: PropTypes.string.isRequired,
+    data: PropTypes.string.isRequired,
     handleArticleBookmark: PropTypes.func
 }
 
