@@ -14,7 +14,7 @@ const Header = ({ cache, handleSetCache }) => {
             </div>
             <div className="float-left text-white py-2 font-bold" onClick={() => handleSetCache("selectedMenu", "home")}>
                 <h1 className="text-xl text-green-500">LAMPU NEON</h1>
-                <p className="text-xs">Berita Teknologi Apa Adanya</p>
+                <p className="text-xs font-light">Berita Teknologi Apa Adanya</p>
             </div>
             <div className="h-16 w-16 text-gray-200 float-right" onClick={() => handleSetCache("selectedMenu", toggleBookmark)}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill={fillValue} viewBox="-12 -12 48 48" stroke={strokeValue}>

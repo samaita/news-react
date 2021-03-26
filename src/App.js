@@ -286,6 +286,9 @@ function Home() {
 		if (articleList && articleList.length <= 0) {
 			handleSelectCategory(selectedCategory)
 		}
+		if (topArticleList && topArticleList.length <= 0) {
+			handleGetTopArticle()
+		}
 	})
 
 	function useLocalStorage(key, initialValue) {
