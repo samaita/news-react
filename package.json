@@ -1,6 +1,7 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "news-react",
+  "homepage": "https://samaita.github.io/news-react",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.1.1",
