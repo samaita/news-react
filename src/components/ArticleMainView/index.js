@@ -2,10 +2,10 @@ import PropTypes from 'prop-types'
 
 import ArticleView from '../ArticleView'
 
-const ArticleBookmarkedView = ({ useMock, selectedMenu, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
+const ArticleMainView = ({ useMock, selectedMenu, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
     return (
         <div>
-            {selectedMenu === "bookmark" && <div className="mt-14 pt-4 bg-black">
+            {selectedMenu === "home" && <div className="">
                 <ArticleView
                     useMock={useMock}
                     articleList={articleList}
@@ -21,7 +21,7 @@ const ArticleBookmarkedView = ({ useMock, selectedMenu, articleList, articleBook
     )
 }
 
-ArticleBookmarkedView.propTypes = {
+ArticleMainView.propTypes = {
     useMock: PropTypes.bool,
     articleList: PropTypes.arrayOf(PropTypes.shape(
         {
@@ -49,4 +49,4 @@ ArticleBookmarkedView.propTypes = {
     handleArticleBookmark: PropTypes.func.isRequired
 }
 
-export default ArticleBookmarkedView
+export default ArticleMainView

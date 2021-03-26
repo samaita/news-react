@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import ActionButton from '../ActionButton'
 import Loader from '../Loader'
 
-const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
+const ArticleView = ({ useMock, articleList, selectedMenu, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
     let LayoutArticle = []
 
     articleList.map(function (el, index) {
@@ -45,29 +45,30 @@ const ArticleView = ({ useMock, articleList, articleBookmarked, selectedCategory
     })
 
     return (
-        <div className="min-h-screen flex flex-col">
-            <h1 className="text-2xl font-light font-bold text-gray-200 pl-6 pr-6">
-                {selectedCategory.title ? selectedCategory.title : selectedCategory.name}
-            </h1>
+        <div>
+            < div className="min-h-screen flex flex-col">
+                <h1 className="text-2xl font-light font-bold text-gray-200 pl-6 pr-6">
+                    {selectedCategory.title ? selectedCategory.title : selectedCategory.name}
+                </h1>
 
-            {!useMock && articleList.length > 0 && < InfiniteScroll
-                dataLength={articleList.length}
-                next={handleGetArticle}
-                hasMore={true}
-                loader={Loader}
-                refreshFunction={handleGetArticle}
-                pullDownToRefresh
-                pullDownToRefreshThreshold={50}
-                pullDownToRefreshContent={
-                    <h3 style={{ textAlign: 'center' }}>&#8595; Pull down to refresh</h3>
-                }
-                releaseToRefreshContent={
-                    <h3 style={{ textAlign: 'center' }}>&#8593; Release to refresh</h3>
-                }>
-                {LayoutArticle}
-            </InfiniteScroll>}
-            { useMock && LayoutArticle}
-
+                {!useMock && articleList.length > 0 && < InfiniteScroll
+                    dataLength={articleList.length}
+                    next={handleGetArticle}
+                    hasMore={true}
+                    loader={Loader}
+                    refreshFunction={handleGetArticle}
+                    pullDownToRefresh
+                    pullDownToRefreshThreshold={50}
+                    pullDownToRefreshContent={
+                        <h3 style={{ textAlign: 'center' }}>&#8595; Pull down to refresh</h3>
+                    }
+                    releaseToRefreshContent={
+                        <h3 style={{ textAlign: 'center' }}>&#8593; Release to refresh</h3>
+                    }>
+                    {LayoutArticle}
+                </InfiniteScroll>}
+                {useMock && LayoutArticle}
+            </div >
         </div >
     )
 }
@@ -86,6 +87,7 @@ ArticleView.propTypes = {
             publishedAt: PropTypes.string
         }
     )).isRequired,
+    selectedMenu: PropTypes.string,
     selectedCategory: PropTypes.shape(
         {
             name: PropTypes.string,

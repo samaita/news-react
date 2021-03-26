@@ -2,11 +2,10 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 
-import ArticleView from './components/ArticleView'
+import ArticleMainView from './components/ArticleMainView'
 import ArticleBookmarkedView from './components/ArticleBookmarkedView'
 import CategoryMenu from './components/CategoryMenu'
 import Header from './components/Header'
-import Loader from './components/Loader'
 import SideMenu from './components/SideMenu'
 import Toast from './components/Toast'
 import TrendingView from './components/TrendingView'
@@ -286,6 +285,9 @@ function Home() {
 		if (articleList && articleList.length <= 0) {
 			handleSelectCategory(selectedCategory)
 		}
+		if (topArticleList && topArticleList.length <= 0) {
+			handleGetTopArticle()
+		}
 	})
 
 	function useLocalStorage(key, initialValue) {
@@ -318,43 +320,44 @@ function Home() {
 			<Header
 				cache={cache}
 				handleSetCache={handleSetCache}
-			/>
-			{cache.selectedMenu === "home" && <div>
-				<TrendingView
-					useMock={cache.useMock}
-					articleList={topArticleList}
-					selectedCategory={selectedCategory}
-					maxCharDescription={config.maxCharDescription}
-					handleGetArticle={handleGetArticle}
-					handleTimeFormat={handleTimeFormat} />
-				<CategoryMenu
-					categories={categories}
-					selectedCategory={selectedCategory}
-					handleSelectCategory={handleSelectCategory} />
-				<ArticleView
-					useMock={cache.useMock}
-					articleList={articleList}
-					articleBookmarked={articleBookmarked}
-					selectedCategory={selectedCategory}
-					maxCharDescription={config.maxCharDescription}
-					hasMore={page.hasNext}
-					handleGetArticle={handleGetArticle}
-					handleTimeFormat={handleTimeFormat}
-					handleArticleBookmark={handleArticleBookmark} />
-			</div>}
-			{cache.selectedMenu === "bookmark" && <ArticleBookmarkedView
+				isLoading={isLoading} />
+			<TrendingView
+				useMock={cache.useMock}
+				selectedMenu={cache.selectedMenu}
+				articleList={topArticleList}
+				selectedCategory={selectedCategory}
+				maxCharDescription={config.maxCharDescription}
+				handleGetArticle={handleGetArticle}
+				handleTimeFormat={handleTimeFormat} />
+			<CategoryMenu
+				categories={categories}
+				selectedMenu={cache.selectedMenu}
+				selectedCategory={selectedCategory}
+				handleSelectCategory={handleSelectCategory} />
+			<ArticleMainView
+				useMock={cache.useMock}
+				selectedMenu={cache.selectedMenu}
+				articleList={articleList}
+				articleBookmarked={articleBookmarked}
+				selectedCategory={selectedCategory}
+				maxCharDescription={config.maxCharDescription}
+				hasMore={page.hasNext}
+				handleGetArticle={handleGetArticle}
+				handleTimeFormat={handleTimeFormat}
+				handleArticleBookmark={handleArticleBookmark} />
+			<ArticleBookmarkedView
 				useMock={true}
 				articleList={articleBookmarkedList}
 				articleBookmarked={articleBookmarked}
 				selectedCategory={articleBookmarkedCategory}
 				maxCharDescription={config.maxCharDescription}
+				selectedMenu={cache.selectedMenu}
 				handleGetArticle={handleGetArticleBookmarked}
 				handleTimeFormat={handleTimeFormat}
-				handleArticleBookmark={handleArticleBookmark} />}
+				handleArticleBookmark={handleArticleBookmark} />
 			<Toast
 				toast={toast}
 				handleRemoveToast={handleRemoveToast} />
-			{isLoading && <Loader />}
 			<SideMenu
 				cache={cache}
 				handleSetCache={handleSetCache}
