@@ -5,10 +5,10 @@ import PropTypes from 'prop-types'
 import ActionButton from '../ActionButton'
 import Loader from '../Loader'
 
-const ArticleView = ({ useMock, articleList, selectedMenu, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
+const ArticleView = (props) => {
     let LayoutArticle = []
 
-    articleList.map(function (el, index) {
+    props.articleList.map(function (el, index) {
         let hasDefaultImage = el.urlToImage ? true : false
         let DefaultImage = "https://images.unsplash.com/photo-1606639386377-aa1a3ed390ea?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
 
@@ -27,15 +27,15 @@ const ArticleView = ({ useMock, articleList, selectedMenu, articleBookmarked, se
                             articleData={el}
                             viewBox="-7 -7 40 40"
                             data="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                            selected={articleBookmarked[el.url]}
-                            handleArticleBookmark={handleArticleBookmark}
+                            selected={props.articleBookmarked[el.url]}
+                            handleArticleBookmark={props.handleArticleBookmark}
                         />
                     </div>
                     <div id="body" className="flex flex-col w-full h-full p-3">
                         <h2 id="site" className="font-light text-green-500 leading-5 text-sm"><a href={el.url}>{el.source.name}</a></h2>
                         <h1 id="title" className="mb-1 text-2xl leading-7 text-gray-100">{el.title}</h1>
-                        <h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
-                        <p className="text-white text-base font-light mt-1 mb-2">{el.description && el.description.length > maxCharDescription ? el.description.substring(0, maxCharDescription) + "..." : el.description}</p>
+                        <h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{props.handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
+                        <p className="text-white text-base font-light mt-1 mb-2">{el.description && el.description.length > props.maxCharDescription ? el.description.substring(0, props.maxCharDescription) + "..." : el.description}</p>
                         <a className="text-green-500 block w-full border rounded-md p-2 text-center border-green-500" href={el.url}>Go To Website</a>
                     </div>
                 </div>
@@ -48,15 +48,15 @@ const ArticleView = ({ useMock, articleList, selectedMenu, articleBookmarked, se
         <div>
             < div className="min-h-screen flex flex-col">
                 <h1 className="text-2xl font-light font-bold text-gray-200 pl-6 pr-6">
-                    {selectedCategory.title ? selectedCategory.title : selectedCategory.name}
+                    {props.selectedCategory.title ? props.selectedCategory.title : props.selectedCategory.name}
                 </h1>
 
-                {!useMock && articleList.length > 0 && < InfiniteScroll
-                    dataLength={articleList.length}
-                    next={handleGetArticle}
-                    hasMore={true}
+                {!props.useMock && props.articleList.length > 0 && < InfiniteScroll
+                    dataLength={props.articleList.length}
+                    next={props.handleGetArticle}
+                    hasMore={props.hasMore}
                     loader={Loader}
-                    refreshFunction={handleGetArticle}
+                    refreshFunction={props.handleGetArticle}
                     pullDownToRefresh
                     pullDownToRefreshThreshold={50}
                     pullDownToRefreshContent={
@@ -67,7 +67,7 @@ const ArticleView = ({ useMock, articleList, selectedMenu, articleBookmarked, se
                     }>
                     {LayoutArticle}
                 </InfiniteScroll>}
-                {useMock && LayoutArticle}
+                {props.useMock && LayoutArticle}
             </div >
         </div >
     )
@@ -87,6 +87,7 @@ ArticleView.propTypes = {
             publishedAt: PropTypes.string
         }
     )).isRequired,
+    articleBookmarked: PropTypes.shape({}),
     selectedMenu: PropTypes.string,
     selectedCategory: PropTypes.shape(
         {
@@ -96,6 +97,7 @@ ArticleView.propTypes = {
         }
     ),
     hasMore: PropTypes.bool,
+    maxCharDescription: PropTypes.number,
     handleGetArticle: PropTypes.func.isRequired,
     handleTimeFormat: PropTypes.func.isRequired,
     handleArticleBookmark: PropTypes.func.isRequired

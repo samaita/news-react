@@ -2,20 +2,20 @@ import PropTypes from 'prop-types'
 
 import ArticleView from '../ArticleView'
 
-const ArticleMainView = ({ useMock, selectedMenu, articleList, articleBookmarked, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat, handleArticleBookmark, hasMore }) => {
+const ArticleMainView = (props) => {
     return (
         <div>
-            {selectedMenu === "home" && <div className="">
+            {props.selectedMenu === "home" && <div className="">
                 <ArticleView
-                    useMock={useMock}
-                    articleList={articleList}
-                    articleBookmarked={articleBookmarked}
-                    selectedCategory={selectedCategory}
-                    maxCharDescription={maxCharDescription}
-                    handleGetArticle={handleGetArticle}
-                    handleTimeFormat={handleTimeFormat}
-                    handleArticleBookmark={handleArticleBookmark}
-                    hasMore={hasMore} />
+                    useMock={props.useMock}
+                    articleList={props.articleList}
+                    articleBookmarked={props.articleBookmarked}
+                    selectedCategory={props.selectedCategory}
+                    maxCharDescription={props.maxCharDescription}
+                    handleGetArticle={props.handleGetArticle}
+                    handleTimeFormat={props.handleTimeFormat}
+                    handleArticleBookmark={props.handleArticleBookmark}
+                    hasMore={props.hasMore} />
             </div>}
         </div>
     )
@@ -35,6 +35,7 @@ ArticleMainView.propTypes = {
             publishedAt: PropTypes.string
         }
     )).isRequired,
+    articleBookmarked: PropTypes.shape({}),
     selectedMenu: PropTypes.string,
     selectedCategory: PropTypes.shape(
         {
@@ -44,6 +45,7 @@ ArticleMainView.propTypes = {
         }
     ),
     hasMore: PropTypes.bool,
+    maxCharDescription: PropTypes.number,
     handleGetArticle: PropTypes.func.isRequired,
     handleTimeFormat: PropTypes.func.isRequired,
     handleArticleBookmark: PropTypes.func.isRequired
