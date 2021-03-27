@@ -28,7 +28,7 @@ function Home() {
 	const
 		[config] = useState({
 			newsAPIAuthKey: process.env.REACT_APP_NEWS_API_KEY, /* please move it to a secure backend */
-			newsURLEverything: "https://newsapi.org/v2/everything",
+			newsURLEverything: "https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/everything",
 			defaultErrorMessage: "Maaf, Silahkan coba kembali setelah beberapa saat.",
 			timeout: 10000,
 			maxToast: 3,
@@ -122,15 +122,13 @@ function Home() {
 			}
 
 			axios.get(config.newsURLEverything, {
-				headers: {
-					"X-API-KEY": config.newsAPIAuthKey
-				},
 				params: {
 					qInTitle: category.keyword,
 					page: pageNumber,
 					pageSize: config.pageSize,
 					sortBy: config.sortByDate,
-					language: config.language
+					language: config.language,
+					apiKey: config.newsAPIAuthKey
 				}
 			}).then(res => {
 				setIsLoading(false)
@@ -171,16 +169,14 @@ function Home() {
 			let paramFrom = handleGetPastDate(config.intervalDay)
 
 			axios.get(config.newsURLEverything, {
-				headers: {
-					"X-API-KEY": config.newsAPIAuthKey
-				},
 				params: {
 					qInTitle: topCategory.keyword,
 					page: 1,
 					pageSize: 1,
 					sortBy: config.sortByPopularity,
 					language: config.language,
-					from: paramFrom
+					from: paramFrom,
+					apiKey: config.newsAPIAuthKey
 				}
 			}).then(res => {
 				setTopArticleList(res.data.articles)
@@ -200,7 +196,7 @@ function Home() {
 				newToast = {
 					id: newToastID,
 					type: type,
-					message: (!message) ? config.defaultErrorMessage + newToastID : message,
+					message: (!message) ? config.defaultErrorMessage : message,
 				},
 				currentToast = [...toast]
 
