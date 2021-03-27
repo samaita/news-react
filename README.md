@@ -36,4 +36,4 @@ Much simpler, offline data source
 - **Dark Mode**, well actually not a feature but yeah we theme it in dark
 
 # Disclaimer
-Lampu Neon is not a sub-niche or related to any Online Media. The brand is a completely made up name, we are not the legend of Lampu Merah & Lampu Hijau 😆
+Lampu Neon is not a sub-niche or related to any Online Media. The brand is a completely made up name, and no, we are not affiliated with the Indonesia's newspaper legend: Lampu Merah & Lampu Hijau 😆

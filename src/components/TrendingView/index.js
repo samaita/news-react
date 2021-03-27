@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 
-const TrendingView = ({ useMock, articleList, selectedMenu, selectedCategory, maxCharDescription, handleGetArticle, handleTimeFormat }) => {
+const TrendingView = (props) => {
     let LayoutArticle = []
 
-    articleList.map(function (el, index) {
+    props.articleList.map(function (el, index) {
         let hasDefaultImage = el.urlToImage && el.urlToImage.includes("default")
         let isFirst = index === 0 ? true : false
 
@@ -19,7 +19,7 @@ const TrendingView = ({ useMock, articleList, selectedMenu, selectedCategory, ma
                         <div className="p-2">
                             <h2 id="site" className="font-light text-green-500 mb-3 text-md"><a className="border pl-3 pt-2 pb-2 pr-3 rounded-xs whitespace-nowrap border-green-500 bg-green-500 text-gray-100" href={el.url}>{el.source.name}</a></h2>
                             <h1 id="title" className="font-semibold mb-1 text-3xl leading-7 text-gray-100">{el.title}</h1>
-                            <h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
+                            <h6 id="timestamp" className="text-sm font-light text-gray-400 object-left-bottom">{props.handleTimeFormat(Date.parse(el.publishedAt))}{el.author ? " | " + el.author : ""}</h6>
                         </div>
                     </div>
                 </div>
@@ -30,7 +30,7 @@ const TrendingView = ({ useMock, articleList, selectedMenu, selectedCategory, ma
 
     return (
         <div>
-            {selectedMenu === "home" && <div className="mt-16 block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
+            {props.selectedMenu === "home" && <div className="mt-16 block min-w-screen flex flex-row overflow-x-scroll hide-scroll-bar mb-5">
                 {LayoutArticle}
             </div>}
         </div>
@@ -52,6 +52,7 @@ TrendingView.propTypes = {
             bookmarked: PropTypes.bool
         }
     )).isRequired,
+    maxCharDescription: PropTypes.number,
     selectedMenu: PropTypes.string,
     selectedCategory: PropTypes.shape(
         {
