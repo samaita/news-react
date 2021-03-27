@@ -1,7 +1,12 @@
 # News React
 A news app make in React with React Hook(love this!). You can rename the brand with other name for your liking.
 
-![imgonline-com-ua-twotoone-RalJtiAnnP](https://user-images.githubusercontent.com/6941042/112524420-601b9100-8dd2-11eb-8880-c6b06177e5e9.jpg)
+![Samaita-News-React](https://user-images.githubusercontent.com/6941042/112710995-c0f0b980-8ef7-11eb-8197-24fc586c6e5a.jpeg)
+
+# Live Demo
+You can access the **[Github Pages for News API](https://samaita.github.io/news-react/)**. If you want to see the APP with News API, there are several steps you need to do:
+1. Since we are using CORS Proxy, please access [CORS Proxy by Rob--W](https://cors-anywhere.herokuapp.com/) and enable it first.
+2. **Precaution**, the API could still fail due to Cloudflare Captcha for CORS Proxy, so make sure your browser's cookie enabled.
 
 # How To Run for devel
 There are two way to run this app: Dynamic & Mock.
